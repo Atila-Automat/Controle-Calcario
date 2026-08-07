@@ -147,28 +147,26 @@
     content:"";position:absolute;left:0;top:14px;bottom:14px;width:3px;background:var(--amber);border-radius:0 3px 3px 0;
   }
   .card-eyebrow{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:0 0 4px;}
-  .card-title{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:4px;}
-  .card-title h3{margin:0;font-size:17px;font-weight:700;font-family:var(--font-mono);}
-  .card-sub{font-size:12.5px;color:var(--charcoal-light);margin:0 0 14px;}
+  .card-sub{font-size:12.5px;color:var(--charcoal-light);margin:4px 0 0;}
   .status-chip{font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:4px 9px;border-radius:5px;white-space:nowrap;}
   .status-chip.finalizado{background:var(--amber-dim);color:var(--amber);}
   .status-chip.andamento{background:var(--orange-dim);color:var(--orange);}
-  .status-chip.nao-iniciado{background:rgba(255,255,255,0.06);color:var(--muted);}
-  .status-chip.sem-cadastro{background:rgba(255,255,255,0.04);color:var(--faint);}
+  .status-chip.nao-iniciado{background:rgba(255,255,255,0.08);color:var(--muted);}
+  .status-chip.sem-cadastro{background:rgba(255,255,255,0.05);color:var(--faint);}
 
-  .stat-row{display:flex;justify-content:space-between;margin-bottom:12px;}
-  .stat{flex:1;}
-  .stat + .stat{text-align:center;}
-  .stat:last-child{text-align:right;}
+  .ring-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+  .ring-id h3{margin:0;font-size:18px;font-weight:700;font-family:var(--font-mono);}
+  .ring-svg{flex-shrink:0;}
+  .ring-stats{display:flex;justify-content:space-between;margin-top:16px;border-top:1px solid var(--border);padding-top:12px;}
+  .ring-stats .stat{flex:1;}
+  .ring-stats .stat + .stat{text-align:center;}
+  .ring-stats .stat:last-child{text-align:right;}
+  .ring-foot{display:flex;justify-content:space-between;margin-top:10px;font-size:11px;color:var(--faint);font-family:var(--font-mono);}
+
   .stat-label{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:0 0 3px;}
   .stat-value{font-size:15px;font-weight:600;font-family:var(--font-mono);margin:0;}
   .stat-value.hi{color:var(--amber);}
   .stat-value.lo{color:var(--orange);}
-
-  .gauge-track{height:8px;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;overflow:hidden;margin-bottom:6px;}
-  .gauge-fill{height:100%;background:var(--amber);}
-  .gauge-fill.full{background:var(--amber);}
-  .gauge-foot{display:flex;justify-content:space-between;font-size:11px;color:var(--faint);font-family:var(--font-mono);}
 
   .empty-state{padding:40px 20px;text-align:center;color:var(--muted);border:1px dashed var(--border);border-radius:var(--radius);font-size:13px;}
 
@@ -235,12 +233,9 @@
 
   <div id="status-banner"></div>
 
-  <section class="block">
-    <div class="block-title">
-      <h2>Clientes</h2>
-      <span id="client-hint">clique para filtrar os pedidos abaixo</span>
-    </div>
-    <div class="card-grid" id="client-grid"></div>
+  <section class="filter-section">
+    <p class="filter-label">Filtrar por cliente</p>
+    <div class="client-row" id="client-row"></div>
   </section>
 
   <section class="block">
@@ -499,51 +494,32 @@
     return state.pedidosView.filter(function(p){ return p.cliente === state.selectedClient; });
   }
 
-  function computeStats(list){
-    var totalContratado=0, totalEntregue=0, totalFalta=0, totalFrete=0, abertos=0, finalizados=0;
-    list.forEach(function(p){
-      if(p.contratado !== null){ totalContratado += p.contratado; totalFalta += p.falta; }
-      totalEntregue += p.entregue;
-      totalFrete += p.frete;
-      if(p.status==='andamento' || p.status==='nao-iniciado') abertos++;
-      if(p.status==='finalizado') finalizados++;
-    });
-    var pct = totalContratado > 0 ? (totalEntregue/totalContratado*100) : 0;
-    return {totalContratado:totalContratado, totalEntregue:totalEntregue, totalFalta:totalFalta, totalFrete:totalFrete, abertos:abertos, finalizados:finalizados, pct:pct, count:list.length};
-  }
-
-  function clientCardHtml(name, stats, selected){
-    return (
-      '<div class="pedido-card'+(selected?' selected':'')+'" data-client="'+String(name).replace(/"/g,'&quot;')+'">' +
-        '<p class="card-eyebrow">'+stats.count+' pedido(s) &middot; '+stats.abertos+' em aberto</p>' +
-        '<div class="card-title"><h3>'+name+'</h3></div>' +
-        '<div class="stat-row">' +
-          '<div class="stat"><p class="stat-label">Contratado</p><p class="stat-value">'+fmtNum(toTon(stats.totalContratado),1)+' t</p></div>' +
-          '<div class="stat"><p class="stat-label">Atendido</p><p class="stat-value hi">'+fmtNum(toTon(stats.totalEntregue),1)+' t</p></div>' +
-          '<div class="stat"><p class="stat-label">Falta</p><p class="stat-value lo">'+fmtNum(toTon(stats.totalFalta),1)+' t</p></div>' +
-        '</div>' +
-        '<div class="gauge-track"><div class="gauge-fill" style="width:'+Math.min(100,stats.pct)+'%"></div></div>' +
-        '<div class="gauge-foot"><span>'+fmtNum(stats.pct,1)+'%</span><span>frete '+fmtCurrency(stats.totalFrete)+'</span></div>' +
-      '</div>'
-    );
-  }
-
-  function renderClientCards(){
+  function renderClientRow(){
     var clients = clientList();
-    var grid = document.getElementById('client-grid');
-    var html = clientCardHtml('Todos', computeStats(state.pedidosView), state.selectedClient === 'Todos');
+    var row = document.getElementById('client-row');
+    var html = '<button type="button" class="client-pill' + (state.selectedClient==='Todos'?' active':'') + '" data-client="Todos">Todos</button>';
     html += clients.map(function(c){
-      var list = state.pedidosView.filter(function(p){ return p.cliente === c; });
-      return clientCardHtml(c, computeStats(list), state.selectedClient === c);
+      return '<button type="button" class="client-pill' + (state.selectedClient===c?' active':'') + '" data-client="'+c.replace(/"/g,'&quot;')+'">'+c+'</button>';
     }).join('');
-    grid.innerHTML = html;
-    grid.querySelectorAll('.pedido-card').forEach(function(card){
-      card.addEventListener('click', function(){
-        state.selectedClient = card.getAttribute('data-client');
+    row.innerHTML = html;
+    row.querySelectorAll('.client-pill').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        state.selectedClient = btn.getAttribute('data-client');
         state.selectedPedido = null;
         render();
       });
     });
+  }
+
+  function ringSvg(pct){
+    var r = 24, c = 2*Math.PI*r;
+    var p = Math.max(0, Math.min(100, pct||0));
+    var offset = c * (1 - p/100);
+    return '<svg class="ring-svg" width="56" height="56" viewBox="0 0 56 56">' +
+      '<circle cx="28" cy="28" r="'+r+'" fill="none" stroke="#454A52" stroke-width="6"/>' +
+      '<circle cx="28" cy="28" r="'+r+'" fill="none" stroke="#FBA832" stroke-width="6" stroke-linecap="round" stroke-dasharray="'+c.toFixed(1)+'" stroke-dashoffset="'+offset.toFixed(1)+'" transform="rotate(-90 28 28)"/>' +
+      '<text x="28" y="32" text-anchor="middle" font-family="JetBrains Mono" font-size="12.5" font-weight="600" fill="#F3F2EE">'+fmtNum(p,0)+'%</text>' +
+    '</svg>';
   }
 
   function renderCards(){
@@ -556,22 +532,27 @@
     }
     grid.innerHTML = list.map(function(p){
       var selected = state.selectedPedido === p.numero;
-      var numsHtml = p.contratado !== null ?
-        '<div class="stat-row">' +
-          '<div class="stat"><p class="stat-label">Contratado</p><p class="stat-value">'+fmtNum(toTon(p.contratado),1)+' t</p></div>' +
-          '<div class="stat"><p class="stat-label">Atendido</p><p class="stat-value hi">'+fmtNum(toTon(p.entregue),1)+' t</p></div>' +
-          '<div class="stat"><p class="stat-label">Falta</p><p class="stat-value lo">'+fmtNum(toTon(p.falta),1)+' t</p></div>' +
+      var ring = p.contratado !== null ? ringSvg(p.pct) : '';
+      var statsHtml = p.contratado !== null ?
+        '<div class="ring-stats">' +
+          '<div class="stat"><p class="stat-label">Contratado</p><p class="stat-value">'+fmtNum(toTon(p.contratado),1)+' ton</p></div>' +
+          '<div class="stat"><p class="stat-label">Atendido</p><p class="stat-value hi">'+fmtNum(toTon(p.entregue),1)+' ton</p></div>' +
+          '<div class="stat"><p class="stat-label">Falta</p><p class="stat-value lo">'+fmtNum(toTon(p.falta),1)+' ton</p></div>' +
         '</div>' +
-        '<div class="gauge-track"><div class="gauge-fill" style="width:'+(p.pct||0)+'%"></div></div>' +
-        '<div class="gauge-foot"><span>'+fmtNum(p.pct,1)+'%</span><span>'+p.viagens+' viagem(ns)</span></div>'
+        '<div class="ring-foot"><span>'+statusLabel(p.status)+'</span><span>'+p.viagens+' viagem(ns)</span></div>'
         :
-        '<div class="stat-row"><div class="stat"><p class="stat-label">Entregue (sem pedido cadastrado)</p><p class="stat-value hi">'+fmtNum(toTon(p.entregue),1)+' t</p></div></div>';
+        '<div class="ring-stats"><div class="stat"><p class="stat-label">Entregue (sem pedido cadastrado)</p><p class="stat-value hi">'+fmtNum(toTon(p.entregue),1)+' ton</p></div></div>';
       return (
         '<div class="pedido-card'+(selected?' selected':'')+'" data-pedido="'+p.numero+'">' +
-          '<p class="card-eyebrow">'+(p.cliente||'—')+'</p>' +
-          '<div class="card-title"><h3>#'+p.numero+'</h3><span class="status-chip '+p.status+'">'+statusLabel(p.status)+'</span></div>' +
-          '<p class="card-sub">'+(p.produto||'—')+(p.data?' &middot; '+fmtDate(p.data):'')+'</p>' +
-          numsHtml +
+          '<div class="ring-top">' +
+            '<div class="ring-id">' +
+              '<p class="card-eyebrow">'+(p.cliente||'—')+'</p>' +
+              '<h3>'+p.numero+'</h3>' +
+              '<p class="card-sub">'+(p.produto||'—')+(p.data?' &middot; '+fmtDate(p.data):'')+'</p>' +
+            '</div>' +
+            ring +
+          '</div>' +
+          statsHtml +
         '</div>'
       );
     }).join('');
@@ -606,13 +587,13 @@
 
     var statsHtml = p.contratado !== null ?
       '<div class="detail-stats">' +
-        '<div><p class="stat-label">Contratado</p><p class="stat-value">'+fmtNum(toTon(p.contratado),1)+' t</p></div>' +
-        '<div><p class="stat-label">Atendido</p><p class="stat-value" style="color:var(--amber)">'+fmtNum(toTon(p.entregue),1)+' t</p></div>' +
-        '<div><p class="stat-label">Falta</p><p class="stat-value" style="color:var(--orange)">'+fmtNum(toTon(p.falta),1)+' t</p></div>' +
+        '<div><p class="stat-label">Contratado</p><p class="stat-value">'+fmtNum(toTon(p.contratado),1)+' ton</p></div>' +
+        '<div><p class="stat-label">Atendido</p><p class="stat-value" style="color:var(--amber)">'+fmtNum(toTon(p.entregue),1)+' ton</p></div>' +
+        '<div><p class="stat-label">Falta</p><p class="stat-value" style="color:var(--orange)">'+fmtNum(toTon(p.falta),1)+' ton</p></div>' +
         '<div><p class="stat-label">Frete total</p><p class="stat-value">'+fmtCurrency(p.frete)+'</p></div>' +
       '</div>'
       :
-      '<div class="detail-stats"><div><p class="stat-label">Entregue</p><p class="stat-value" style="color:var(--amber)">'+fmtNum(toTon(p.entregue),1)+' t</p></div></div>';
+      '<div class="detail-stats"><div><p class="stat-label">Entregue</p><p class="stat-value" style="color:var(--amber)">'+fmtNum(toTon(p.entregue),1)+' ton</p></div></div>';
 
     var tableRows = rows.map(function(r){
       return '<tr>' +
@@ -621,7 +602,7 @@
         '<td>'+(r.placa||'—')+'</td>' +
         '<td>'+(r.nf||'—')+'</td>' +
         '<td>'+(r.cte||'—')+'</td>' +
-        '<td class="num">'+fmtNum(toTon(r.pesoNF),2)+' t</td>' +
+        '<td class="num">'+fmtNum(toTon(r.pesoNF),2)+' ton</td>' +
         '<td class="num">'+fmtCurrency(r.valorKg)+'</td>' +
         '<td class="num">'+fmtCurrency(r.freteTotal)+'</td>' +
         '<td>'+(r.tipo||'—')+'</td>' +
@@ -656,7 +637,7 @@
         },
         options:{
           responsive:true, maintainAspectRatio:false,
-          plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:function(ctx){ return fmtNum(ctx.parsed.y,2)+' t'; } } } },
+          plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:function(ctx){ return fmtNum(ctx.parsed.y,2)+' ton'; } } } },
           scales:{
             x:{ ticks:{ color:muted }, grid:{ display:false } },
             y:{ ticks:{ color:muted, callback:function(v){return fmtNum(v,1);} }, grid:{ color:grid } }
@@ -667,7 +648,7 @@
   }
 
   function render(){
-    renderClientCards();
+    renderClientRow();
     renderCards();
     renderDetail();
   }
