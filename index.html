@@ -8,11 +8,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0A0A0B;
-    --surface:#161719;
-    --surface-2:#1D1F22;
-    --border:#2A2C2F;
-    --border-soft:#222325;
+    --bg:#232529;
+    --surface:#2C2F34;
+    --surface-2:#353941;
+    --border:#454A52;
+    --border-soft:#3A3E45;
     --charcoal:#4B4B4D;
     --charcoal-light:#8A8A8C;
     --orange:#F06135;
@@ -221,7 +221,7 @@
       <img id="logo-img" src="" alt="Integral Transportes">
       <div class="brand-text">
         <p class="eyebrow">Integral Transportes</p>
-        <h1>Controle de carregamento</h1>
+        <h1>Acompanhamento calcário</h1>
       </div>
     </div>
     <div class="header-meta">
@@ -235,11 +235,12 @@
 
   <div id="status-banner"></div>
 
-  <section class="kpi-strip" id="kpi-strip"></section>
-
-  <section class="filter-section">
-    <p class="filter-label">Filtrar por cliente</p>
-    <div class="client-row" id="client-row"></div>
+  <section class="block">
+    <div class="block-title">
+      <h2>Clientes</h2>
+      <span id="client-hint">clique para filtrar os pedidos abaixo</span>
+    </div>
+    <div class="card-grid" id="client-grid"></div>
   </section>
 
   <section class="block">
@@ -498,25 +499,7 @@
     return state.pedidosView.filter(function(p){ return p.cliente === state.selectedClient; });
   }
 
-  function renderClientRow(){
-    var clients = clientList();
-    var row = document.getElementById('client-row');
-    var html = '<button type="button" class="client-pill' + (state.selectedClient==='Todos'?' active':'') + '" data-client="Todos">Todos</button>';
-    html += clients.map(function(c){
-      return '<button type="button" class="client-pill' + (state.selectedClient===c?' active':'') + '" data-client="'+c.replace(/"/g,'&quot;')+'">'+c+'</button>';
-    }).join('');
-    row.innerHTML = html;
-    row.querySelectorAll('.client-pill').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        state.selectedClient = btn.getAttribute('data-client');
-        state.selectedPedido = null;
-        render();
-      });
-    });
-  }
-
-  function renderKPIs(){
-    var list = filteredPedidos();
+  function computeStats(list){
     var totalContratado=0, totalEntregue=0, totalFalta=0, totalFrete=0, abertos=0, finalizados=0;
     list.forEach(function(p){
       if(p.contratado !== null){ totalContratado += p.contratado; totalFalta += p.falta; }
@@ -526,18 +509,41 @@
       if(p.status==='finalizado') finalizados++;
     });
     var pct = totalContratado > 0 ? (totalEntregue/totalContratado*100) : 0;
-    var items = [
-      {label:'Contratado', value: fmtNum(toTon(totalContratado),1) + ' <span>t</span>', cls:''},
-      {label:'Atendido', value: fmtNum(toTon(totalEntregue),1) + ' <span>t</span>', cls:'amber'},
-      {label:'Falta atender', value: fmtNum(toTon(totalFalta),1) + ' <span>t</span>', cls:'orange'},
-      {label:'% atendimento', value: fmtNum(pct,1) + '<span>%</span>', cls:''},
-      {label:'Frete total', value: fmtCurrency(totalFrete), cls:''},
-      {label:'Pedidos em aberto', value: String(abertos), cls:'orange'},
-      {label:'Finalizados', value: String(finalizados), cls:'amber'}
-    ];
-    document.getElementById('kpi-strip').innerHTML = items.map(function(it){
-      return '<div class="kpi '+it.cls+'"><p class="kpi-label">'+it.label+'</p><p class="kpi-value">'+it.value+'</p></div>';
+    return {totalContratado:totalContratado, totalEntregue:totalEntregue, totalFalta:totalFalta, totalFrete:totalFrete, abertos:abertos, finalizados:finalizados, pct:pct, count:list.length};
+  }
+
+  function clientCardHtml(name, stats, selected){
+    return (
+      '<div class="pedido-card'+(selected?' selected':'')+'" data-client="'+String(name).replace(/"/g,'&quot;')+'">' +
+        '<p class="card-eyebrow">'+stats.count+' pedido(s) &middot; '+stats.abertos+' em aberto</p>' +
+        '<div class="card-title"><h3>'+name+'</h3></div>' +
+        '<div class="stat-row">' +
+          '<div class="stat"><p class="stat-label">Contratado</p><p class="stat-value">'+fmtNum(toTon(stats.totalContratado),1)+' t</p></div>' +
+          '<div class="stat"><p class="stat-label">Atendido</p><p class="stat-value hi">'+fmtNum(toTon(stats.totalEntregue),1)+' t</p></div>' +
+          '<div class="stat"><p class="stat-label">Falta</p><p class="stat-value lo">'+fmtNum(toTon(stats.totalFalta),1)+' t</p></div>' +
+        '</div>' +
+        '<div class="gauge-track"><div class="gauge-fill" style="width:'+Math.min(100,stats.pct)+'%"></div></div>' +
+        '<div class="gauge-foot"><span>'+fmtNum(stats.pct,1)+'%</span><span>frete '+fmtCurrency(stats.totalFrete)+'</span></div>' +
+      '</div>'
+    );
+  }
+
+  function renderClientCards(){
+    var clients = clientList();
+    var grid = document.getElementById('client-grid');
+    var html = clientCardHtml('Todos', computeStats(state.pedidosView), state.selectedClient === 'Todos');
+    html += clients.map(function(c){
+      var list = state.pedidosView.filter(function(p){ return p.cliente === c; });
+      return clientCardHtml(c, computeStats(list), state.selectedClient === c);
     }).join('');
+    grid.innerHTML = html;
+    grid.querySelectorAll('.pedido-card').forEach(function(card){
+      card.addEventListener('click', function(){
+        state.selectedClient = card.getAttribute('data-client');
+        state.selectedPedido = null;
+        render();
+      });
+    });
   }
 
   function renderCards(){
@@ -661,8 +667,7 @@
   }
 
   function render(){
-    renderClientRow();
-    renderKPIs();
+    renderClientCards();
     renderCards();
     renderDetail();
   }
