@@ -8,11 +8,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#232529;
-    --surface:#2C2F34;
-    --surface-2:#353941;
-    --border:#454A52;
-    --border-soft:#3A3E45;
+    --bg:#2A2A2C;
+    --surface:#333335;
+    --surface-2:#3C3C3F;
+    --border:#4E4E51;
+    --border-soft:#434345;
     --charcoal:#4B4B4D;
     --charcoal-light:#8A8A8C;
     --orange:#F06135;
@@ -68,7 +68,7 @@
   button.primary{background:var(--orange);color:#1a0a04;border-color:var(--orange);}
   button.primary:hover{background:#FF7847;}
 
-  main{padding:0 clamp(16px,4vw,52px) 72px;max-width:1440px;margin:0 auto;}
+  main{padding:0 clamp(16px,3vw,40px) 72px;max-width:none;width:100%;margin:0 auto;}
 
   /* ---------- STATUS BANNER ---------- */
   #status-banner{
@@ -273,7 +273,7 @@
 
   var state = {
     pedidosRaw:null, entregasRaw:null, pedidosView:[], entregas:[],
-    selectedClient:'Todos', selectedPedido:null, detailChart:null
+    selectedClient:null, selectedPedido:null, detailChart:null
   };
 
   function normKey(s){
@@ -403,11 +403,12 @@
       var numero = String(getField(row,['Numero do pedido','Numero pedido','Pedido'])).trim();
       if(!numero) return;
       pedidosMap[numero] = {
-        numero: numero,
         data: parseDateBR(getField(row,['Data do Pedido','Data pedido','Data'])),
+        numero: numero,
         cliente: String(getField(row,['Cliente'])).trim(),
         produto: String(getField(row,['Produto'])).trim(),
-        volumeContratado: parseNumberBR(getField(row,['Volume contratado','Volume']))
+        volumeContratado: parseNumberBR(getField(row,['Volume contratado','Volume'])),
+        valorTonelada: parseNumberBR(getField(row,['Valor tonelada contratada','Valor tonelada','Valor ton contratado','Valor ton']))
       };
     });
 
@@ -425,12 +426,13 @@
         numero: numero,
         motorista: String(getField(row,['Motorista'])).trim(),
         placa: String(getField(row,['Placa'])).trim(),
+        tipo: String(getField(row,['Tipo'])).trim(),
         nf: String(getField(row,['NF'])).trim(),
         cte: String(getField(row,['Ct-e','Cte'])).trim(),
         pesoNF: pesoNF,
         valorKg: parseNumberBR(getField(row,['R$ Valor kg','Valor kg'])),
         freteTotal: parseNumberBR(getField(row,['Frete Total','Frete'])),
-        tipo: String(getField(row,['Tipo'])).trim()
+        situacao: String(getField(row,['Situação','Situacao','Status'])).trim()
       };
       entregas.push(d);
       var key = d.numero || '(sem numero)';
@@ -461,6 +463,7 @@
         produto: ped ? ped.produto : (ent.list[0] ? ent.list[0].produto : '—'),
         data: ped ? ped.data : null,
         contratado: contratado,
+        valorTonelada: ped ? ped.valorTonelada : 0,
         entregue: entregue,
         falta: contratado !== null ? Math.max(0, contratado - entregue) : null,
         frete: ent.frete,
@@ -490,15 +493,16 @@
   }
 
   function filteredPedidos(){
-    if(state.selectedClient === 'Todos') return state.pedidosView;
-    return state.pedidosView.filter(function(p){ return p.cliente === state.selectedClient; });
+    if(!state.selectedClient) return [];
+    return state.pedidosView.filter(function(p){
+      return p.cliente === state.selectedClient && p.status !== 'nao-iniciado';
+    });
   }
 
   function renderClientRow(){
     var clients = clientList();
     var row = document.getElementById('client-row');
-    var html = '<button type="button" class="client-pill' + (state.selectedClient==='Todos'?' active':'') + '" data-client="Todos">Todos</button>';
-    html += clients.map(function(c){
+    var html = clients.map(function(c){
       return '<button type="button" class="client-pill' + (state.selectedClient===c?' active':'') + '" data-client="'+c.replace(/"/g,'&quot;')+'">'+c+'</button>';
     }).join('');
     row.innerHTML = html;
@@ -524,10 +528,14 @@
 
   function renderCards(){
     var list = filteredPedidos();
-    document.getElementById('card-count').textContent = list.length + ' pedido(s)';
+    document.getElementById('card-count').textContent = state.selectedClient ? (list.length + ' pedido(s)') : '';
     var grid = document.getElementById('card-grid');
+    if(!state.selectedClient){
+      grid.innerHTML = '<div class="empty-state">Selecione um cliente acima para ver os pedidos.</div>';
+      return;
+    }
     if(list.length === 0){
-      grid.innerHTML = '<div class="empty-state">Nenhum pedido encontrado para este cliente.</div>';
+      grid.innerHTML = '<div class="empty-state">Nenhum pedido em andamento, finalizado ou atendido para este cliente.</div>';
       return;
     }
     grid.innerHTML = list.map(function(p){
@@ -548,7 +556,7 @@
             '<div class="ring-id">' +
               '<p class="card-eyebrow">'+(p.cliente||'—')+'</p>' +
               '<h3>'+p.numero+'</h3>' +
-              '<p class="card-sub">'+(p.produto||'—')+(p.data?' &middot; '+fmtDate(p.data):'')+'</p>' +
+              '<p class="card-sub">'+(p.produto||'—')+(p.data?' &middot; '+fmtDate(p.data):'')+(p.valorTonelada?' &middot; '+fmtCurrency(p.valorTonelada)+'/ton':'')+'</p>' +
             '</div>' +
             ring +
           '</div>' +
@@ -590,6 +598,7 @@
         '<div><p class="stat-label">Contratado</p><p class="stat-value">'+fmtNum(toTon(p.contratado),1)+' ton</p></div>' +
         '<div><p class="stat-label">Atendido</p><p class="stat-value" style="color:var(--amber)">'+fmtNum(toTon(p.entregue),1)+' ton</p></div>' +
         '<div><p class="stat-label">Falta</p><p class="stat-value" style="color:var(--orange)">'+fmtNum(toTon(p.falta),1)+' ton</p></div>' +
+        (p.valorTonelada ? '<div><p class="stat-label">Valor/ton</p><p class="stat-value">'+fmtCurrency(p.valorTonelada)+'</p></div>' : '') +
         '<div><p class="stat-label">Frete total</p><p class="stat-value">'+fmtCurrency(p.frete)+'</p></div>' +
       '</div>'
       :
@@ -600,12 +609,13 @@
         '<td>'+fmtDate(r.data)+'</td>' +
         '<td>'+(r.motorista||'—')+'</td>' +
         '<td>'+(r.placa||'—')+'</td>' +
+        '<td>'+(r.tipo||'—')+'</td>' +
         '<td>'+(r.nf||'—')+'</td>' +
         '<td>'+(r.cte||'—')+'</td>' +
         '<td class="num">'+fmtNum(toTon(r.pesoNF),2)+' ton</td>' +
         '<td class="num">'+fmtCurrency(r.valorKg)+'</td>' +
         '<td class="num">'+fmtCurrency(r.freteTotal)+'</td>' +
-        '<td>'+(r.tipo||'—')+'</td>' +
+        '<td>'+(r.situacao||'—')+'</td>' +
       '</tr>';
     }).join('');
 
@@ -618,7 +628,7 @@
       (rows.length > 1 ? '<div class="chart-wrap"><h4>Viagens ao longo do tempo</h4><div style="position:relative;height:180px;"><canvas id="detail-chart" role="img" aria-label="Gráfico de barras do peso entregue por viagem ao longo do tempo"></canvas></div></div>' : '') +
       (rows.length === 0 ?
         '<div class="empty-state">Nenhuma viagem lançada ainda para este pedido.</div>' :
-        '<div class="table-wrap"><table><thead><tr><th>Data</th><th>Motorista</th><th>Placa</th><th>NF</th><th>Ct-e</th><th class="num">Peso</th><th class="num">R$/kg</th><th class="num">Frete</th><th>Tipo</th></tr></thead><tbody>'+tableRows+'</tbody></table></div>');
+        '<div class="table-wrap"><table><thead><tr><th>Data</th><th>Motorista</th><th>Placa</th><th>Tipo</th><th>NF</th><th>Ct-e</th><th class="num">Peso</th><th class="num">R$/kg</th><th class="num">Frete</th><th>Situação</th></tr></thead><tbody>'+tableRows+'</tbody></table></div>');
 
     document.getElementById('close-detail-btn').addEventListener('click', function(){
       state.selectedPedido = null;
