@@ -332,7 +332,7 @@
   var URL_PEDIDOS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSdkSQeP4qZxXxt1zRkY_wAY_OUIHORpdEF8DeQ8-XYlb3gDdtFQ8z18E4C5TdM_owA7lqeZLtd9XDw/pub?gid=0&single=true&output=csv";
   var URL_ENTREGAS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSdkSQeP4qZxXxt1zRkY_wAY_OUIHORpdEF8DeQ8-XYlb3gDdtFQ8z18E4C5TdM_owA7lqeZLtd9XDw/pub?gid=1036335084&single=true&output=csv";
 
-  var TRUCK_TON = 48;
+  var TRUCK_TON = 48000; // capacidade do caminhão: 48 toneladas = 48.000 kg (dados internos são em kg)
 
   var state = {
     pedidosRaw:null, entregasRaw:null, pedidosView:[], entregas:[],
@@ -521,7 +521,7 @@
       else if(falta < TRUCK_TON){ status = 'finalizado'; }
       else { status = 'andamento'; }
       var pct = (contratado && contratado > 0) ? Math.min(100, (entregue/contratado)*100) : null;
-      var viagensPendentes = (falta !== null && falta > 0) ? Math.ceil(falta / TRUCK_TON) : 0;
+      var viagensPendentes = (falta !== null && falta > 0) ? Math.floor(falta / TRUCK_TON) : 0;
       return {
         numero: numero,
         cliente: ped ? ped.cliente : (ent.list[0] ? ent.list[0].cliente : '—'),
