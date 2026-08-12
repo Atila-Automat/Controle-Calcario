@@ -27,7 +27,7 @@
     --radius:10px;
   }
   *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
+  html,body{margin:0;padding:0;height:100%;}
   body{
     background:var(--bg);
     color:var(--text);
@@ -35,35 +35,38 @@
     font-size:14.5px;
     line-height:1.5;
     -webkit-font-smoothing:antialiased;
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
   }
 
-  /* ---------- HEADER ---------- */
+  /* ---------- HEADER (reduzido ~30%) ---------- */
   header{
-    position:sticky;
-    top:0;
-    z-index:40;
+    flex-shrink:0;
+    position:relative;
     background:var(--bg);
-    padding:26px clamp(16px,4vw,52px) 24px;
+    padding:18px clamp(16px,4vw,36px) 17px;
     border-bottom:1px solid var(--border);
     overflow:hidden;
   }
-  .header-motif{position:absolute;top:-40px;right:clamp(-10px,2vw,60px);width:220px;height:220px;opacity:.5;pointer-events:none;}
-  .header-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:18px;position:relative;z-index:1;}
-  .brand{display:flex;align-items:center;gap:14px;}
-  .brand img{height:52px;width:auto;display:block;}
-  .brand-text .eyebrow{margin:0;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--amber);font-weight:600;}
-  .brand-text h1{margin:2px 0 0;font-size:clamp(20px,2.6vw,27px);font-weight:700;letter-spacing:.01em;text-transform:uppercase;}
-  .header-meta{display:flex;align-items:center;gap:14px;}
-  #last-updated{font-size:12px;color:var(--muted);font-family:var(--font-mono);}
+  .header-motif{position:absolute;top:-28px;right:clamp(-10px,2vw,42px);width:154px;height:154px;opacity:.5;pointer-events:none;}
+  .header-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:13px;position:relative;z-index:1;}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand img{height:36px;width:auto;display:block;}
+  .brand-text .eyebrow{margin:0;font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--amber);font-weight:600;}
+  .brand-text h1{margin:1px 0 0;font-size:clamp(14px,1.8vw,19px);font-weight:700;letter-spacing:.01em;text-transform:uppercase;}
+  .header-meta{display:flex;align-items:center;gap:10px;}
+  #last-updated{font-size:9px;color:var(--muted);font-family:var(--font-mono);}
   button{
     font-family:var(--font-display);
     font-weight:600;
-    font-size:13px;
+    font-size:9.5px;
     background:transparent;
     color:var(--text);
     border:1px solid var(--border);
     border-radius:var(--radius);
-    padding:9px 16px;
+    padding:6px 11px;
     cursor:pointer;
     transition:border-color .15s, background .15s, color .15s;
   }
@@ -71,7 +74,28 @@
   button.primary{background:var(--orange);color:#1a0a04;border-color:var(--orange);}
   button.primary:hover{background:#FF7847;}
 
-  main{padding:0 clamp(16px,3vw,40px) 72px;max-width:none;width:100%;margin:0 auto;}
+  /* ---------- LAYOUT CONGELADO ---------- */
+  main{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    padding:0 clamp(16px,3vw,40px);
+    max-width:none;
+    width:100%;
+    margin:0 auto;
+  }
+  .frozen-top{
+    flex-shrink:1;
+    overflow-y:auto;
+    max-height:62vh;
+  }
+  .scroll-bottom{
+    flex:1;
+    min-height:0;
+    overflow-y:auto;
+    padding-bottom:40px;
+  }
 
   /* ---------- STATUS BANNER ---------- */
   #status-banner{
@@ -107,23 +131,33 @@
   .kpi.amber .kpi-value{color:var(--amber);}
   .kpi.orange .kpi-value{color:var(--orange);}
 
+  /* ---------- STATUS FILTER (agora acima do filtro de cliente) ---------- */
+  .status-filter-section{
+    position:sticky;
+    top:0;
+    z-index:36;
+    background:var(--bg);
+    padding:14px 0 12px;
+    border-bottom:1px solid var(--border-soft);
+  }
+
   /* ---------- CLIENT FILTER ---------- */
   .filter-section{
     position:sticky;
-    top:var(--header-h, 98px);
+    top:0;
     z-index:35;
     background:var(--bg);
-    padding:18px 0 14px;
-    margin-bottom:14px;
+    padding:13px 0 10px;
+    margin-bottom:10px;
     border-bottom:1px solid var(--border-soft);
   }
-  .filter-label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 10px;}
-  .client-row{display:flex;gap:10px;flex-wrap:wrap;}
+  .filter-label{font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 7px;}
+  .client-row{display:flex;gap:7px;flex-wrap:wrap;}
   .client-pill{
     font-family:var(--font-display);
     font-weight:600;
-    font-size:13px;
-    padding:9px 18px;
+    font-size:9px;
+    padding:6px 13px;
     border-radius:999px;
     border:1px solid var(--border);
     background:var(--surface);
@@ -153,11 +187,24 @@
     color:var(--muted);
     cursor:pointer;
     transition:all .15s;
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
   }
   .status-pill:hover{border-color:var(--charcoal-light);color:var(--text);}
   .status-pill.active[data-status="nao-iniciado"]{background:rgba(255,255,255,0.08);border-color:var(--charcoal-light);color:var(--text);}
   .status-pill.active[data-status="andamento"]{background:var(--orange-dim);border-color:var(--orange);color:var(--orange);}
   .status-pill.active[data-status="finalizado"]{background:var(--amber-dim);border-color:var(--amber);color:var(--amber);}
+  .status-pill .status-count{
+    font-family:var(--font-mono);
+    font-size:10px;
+    font-weight:700;
+    background:rgba(255,255,255,0.1);
+    border-radius:999px;
+    padding:1px 7px;
+    line-height:1.5;
+  }
+  .status-pill.active .status-count{background:rgba(0,0,0,0.18);}
 
   /* ---------- PEDIDO CARDS ---------- */
   .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
@@ -224,9 +271,10 @@
     border:1px solid var(--border);
     border-radius:var(--radius);
     padding:24px clamp(16px,3vw,28px);
-    scroll-margin-top:calc(var(--header-h, 98px) + 110px);
   }
   .detail-empty{color:var(--muted);font-size:13px;text-align:center;padding:30px 10px;}
+  .detail-block{margin:0 0 30px;}
+  .detail-block + .detail-block{padding-top:26px;border-top:2px dashed var(--border);}
   .detail-header{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid var(--border);}
   .detail-header h3{margin:0 0 4px;font-size:20px;font-weight:700;font-family:var(--font-mono);}
   .detail-header .sub{font-size:13px;color:var(--muted);}
@@ -265,6 +313,16 @@
     padding:6px 14px;border:none;border-radius:0;background:transparent;color:var(--muted);cursor:pointer;
   }
   .period-toggle button.active{background:var(--amber);color:#241503;}
+  .date-range-filter{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .date-range-filter label{font-size:10.5px;color:var(--muted);display:flex;align-items:center;gap:5px;}
+  .date-range-filter input[type=date]{
+    font-family:var(--font-mono);font-size:11px;color:var(--text);
+    background:var(--surface);border:1px solid var(--border);border-radius:6px;
+    padding:4px 7px;
+  }
+  .date-range-filter .clear-range{
+    font-size:10.5px;padding:4px 10px;border-radius:6px;
+  }
   .metric-switch{display:flex;align-items:center;gap:8px;}
   .metric-switch .metric-label{font-size:11px;font-weight:600;color:var(--faint);text-transform:uppercase;letter-spacing:.04em;cursor:pointer;transition:color .15s;}
   .metric-switch .metric-label.active{color:var(--amber);}
@@ -313,37 +371,47 @@
 
 <main>
 
-  <div id="status-banner"></div>
+  <div class="frozen-top">
 
-  <section class="filter-section">
-    <p class="filter-label">Filtrar por cliente (selecione um ou mais)</p>
-    <div class="client-row" id="client-row"></div>
-  </section>
+    <div id="status-banner"></div>
 
-  <section class="block">
-    <div class="block-title">
-      <div class="block-title-left">
+    <section class="status-filter-section">
+      <p class="filter-label">Filtrar por situação</p>
+      <div class="status-filter-row" id="status-filter-row"></div>
+    </section>
+
+    <section class="filter-section">
+      <p class="filter-label">Filtrar por cliente (selecione um ou mais)</p>
+      <div class="client-row" id="client-row"></div>
+    </section>
+
+    <section class="block">
+      <div class="block-title">
         <h2>Pedidos</h2>
-        <div class="status-filter-row" id="status-filter-row"></div>
+        <span id="card-count"></span>
       </div>
-      <span id="card-count"></span>
-    </div>
-    <div class="card-grid" id="card-grid"></div>
-  </section>
+      <div class="card-grid" id="card-grid"></div>
+    </section>
 
-  <section class="block">
-    <div class="block-title">
-      <h2>Detalhamento</h2>
-      <span id="detail-hint"></span>
-    </div>
-    <div id="detail-panel">
-      <div class="detail-empty">Selecione um pedido acima para ver as viagens realizadas.</div>
-    </div>
-  </section>
+  </div>
+
+  <div class="scroll-bottom">
+
+    <section class="block">
+      <div class="block-title">
+        <h2>Detalhamento</h2>
+        <span id="detail-hint"></span>
+      </div>
+      <div id="detail-panel">
+        <div class="detail-empty">Selecione um ou mais pedidos acima para ver as viagens realizadas.</div>
+      </div>
+    </section>
+
+    <footer>Integral Transportes &middot; Painel gerado a partir das planilhas de pedidos e entregas</footer>
+
+  </div>
 
 </main>
-
-<footer>Integral Transportes &middot; Painel gerado a partir das planilhas de pedidos e entregas</footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
@@ -360,9 +428,19 @@
 
   var state = {
     pedidosRaw:null, entregasRaw:null, pedidosView:[], entregas:[],
-    selectedClients:[], selectedStatuses:[], selectedPedido:null, selectedTipos:[], detailChart:null,
-    chartPeriod:'dia', chartMetric:'toneladas'
+    selectedClients:[], selectedStatuses:[],
+    selectedPedidos:[],
+    selectedTiposByPedido:{},
+    chartPeriodByPedido:{},
+    chartMetricByPedido:{},
+    chartRangeByPedido:{},
+    detailCharts:{}
   };
+
+  function getTipos(numero){ return state.selectedTiposByPedido[numero] || (state.selectedTiposByPedido[numero] = []); }
+  function getChartPeriod(numero){ return state.chartPeriodByPedido[numero] || 'dia'; }
+  function getChartMetric(numero){ return state.chartMetricByPedido[numero] || 'toneladas'; }
+  function getChartRange(numero){ return state.chartRangeByPedido[numero] || (state.chartRangeByPedido[numero] = {start:'', end:''}); }
 
   function normKey(s){
     return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
@@ -423,6 +501,27 @@
     return n.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
   }
   function toTon(kg){ return kg/1000; }
+  function roundHalfUp(n){
+    var floor = Math.floor(n);
+    var frac = n - floor;
+    return frac >= 0.5 ? floor + 1 : floor;
+  }
+  function isoWeek(date){
+    var d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    var dayNum = (d.getUTCDay() + 6) % 7; // segunda-feira = 0
+    d.setUTCDate(d.getUTCDate() - dayNum + 3); // quinta-feira da semana
+    var firstThursday = new Date(Date.UTC(d.getUTCFullYear(), 0, 4));
+    var firstDayNum = (firstThursday.getUTCDay() + 6) % 7;
+    firstThursday.setUTCDate(firstThursday.getUTCDate() - firstDayNum + 3);
+    var weekNo = 1 + Math.round((d.getTime() - firstThursday.getTime()) / (7*24*3600*1000));
+    return {week:weekNo, year:d.getUTCFullYear()};
+  }
+  function parseISODateInput(str){
+    if(!str) return null;
+    var m = String(str).trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if(!m) return null;
+    return new Date(parseInt(m[1],10), parseInt(m[2],10)-1, parseInt(m[3],10));
+  }
 
   function fetchCSV(url){
     return fetch(url, {cache:'no-store'}).then(function(res){
@@ -480,7 +579,7 @@
   function onDataReady(){
     hideBanner();
     buildModel();
-    state.selectedPedido = null;
+    state.selectedPedidos = [];
     render();
     document.getElementById('last-updated').textContent = 'Atualizado às ' + new Date().toLocaleTimeString('pt-BR');
   }
@@ -546,7 +645,7 @@
       else if(falta < TRUCK_TON){ status = 'finalizado'; }
       else { status = 'andamento'; }
       var pct = (contratado && contratado > 0) ? Math.min(100, (entregue/contratado)*100) : null;
-      var viagensPendentes = (falta !== null && falta > 0) ? Math.floor(falta / TRUCK_TON) : 0;
+      var viagensPendentes = (falta !== null && falta > 0) ? roundHalfUp(falta / TRUCK_TON) : 0;
       return {
         numero: numero,
         cliente: ped ? ped.cliente : (ent.list[0] ? ent.list[0].cliente : '—'),
@@ -594,16 +693,26 @@
     return list;
   }
 
+  function statusCounts(){
+    var base = state.selectedClients.length ?
+      state.pedidosView.filter(function(p){ return state.selectedClients.indexOf(p.cliente) !== -1; }) :
+      state.pedidosView;
+    var counts = {'nao-iniciado':0, 'andamento':0, 'finalizado':0};
+    base.forEach(function(p){ if(counts[p.status] !== undefined) counts[p.status]++; });
+    return counts;
+  }
+
   function renderStatusFilterRow(){
     var STATUS_OPTIONS = [
       {key:'nao-iniciado', label:'Não atendido'},
       {key:'andamento', label:'Em andamento'},
       {key:'finalizado', label:'Finalizado'}
     ];
+    var counts = statusCounts();
     var row = document.getElementById('status-filter-row');
     row.innerHTML = STATUS_OPTIONS.map(function(o){
       var active = state.selectedStatuses.indexOf(o.key) !== -1;
-      return '<button type="button" class="status-pill'+(active?' active':'')+'" data-status="'+o.key+'">'+o.label+'</button>';
+      return '<button type="button" class="status-pill'+(active?' active':'')+'" data-status="'+o.key+'">'+o.label+' <span class="status-count">'+(counts[o.key]||0)+'</span></button>';
     }).join('');
     row.querySelectorAll('.status-pill').forEach(function(btn){
       btn.addEventListener('click', function(){
@@ -629,7 +738,7 @@
         var c = btn.getAttribute('data-client');
         var idx = state.selectedClients.indexOf(c);
         if(idx === -1) state.selectedClients.push(c); else state.selectedClients.splice(idx,1);
-        state.selectedPedido = null;
+        state.selectedPedidos = [];
         render();
       });
     });
@@ -649,7 +758,13 @@
       var bucket = period === 'semana' ? startOfWeek(r.data) : new Date(r.data.getFullYear(), r.data.getMonth(), r.data.getDate());
       var key = bucket.getTime();
       if(!map[key]){
-        var label = period === 'semana' ? ('Sem. ' + fmtDate(bucket)) : fmtDate(bucket);
+        var label;
+        if(period === 'semana'){
+          var iw = isoWeek(r.data);
+          label = 'Sem ' + iw.week + '/' + iw.year;
+        } else {
+          label = fmtDate(bucket);
+        }
         map[key] = { key:key, label:label, viagens:0, toneladas:0 };
       }
       map[key].viagens += 1;
@@ -682,7 +797,7 @@
       return;
     }
     grid.innerHTML = list.map(function(p){
-      var selected = state.selectedPedido === p.numero;
+      var selected = state.selectedPedidos.indexOf(p.numero) !== -1;
       var ring = p.contratado !== null ? ringSvg(p.pct) : '';
       var statsHtml = p.contratado !== null ?
         '<div class="ring-stats">' +
@@ -716,12 +831,14 @@
     grid.querySelectorAll('.pedido-card').forEach(function(card){
       card.addEventListener('click', function(){
         var num = card.getAttribute('data-pedido');
-        state.selectedPedido = (state.selectedPedido === num) ? null : num;
-        state.selectedTipos = [];
+        var idx = state.selectedPedidos.indexOf(num);
+        var adding = idx === -1;
+        if(adding) state.selectedPedidos.push(num); else state.selectedPedidos.splice(idx,1);
         renderCards();
         renderDetail();
-        if(state.selectedPedido){
-          document.getElementById('detail-panel').scrollIntoView({behavior:'smooth', block:'nearest'});
+        if(adding){
+          var scrollArea = document.querySelector('.scroll-bottom');
+          if(scrollArea) scrollArea.scrollTo({top:0, behavior:'smooth'});
         }
       });
     });
@@ -730,14 +847,33 @@
   function renderDetail(){
     var panel = document.getElementById('detail-panel');
     var hint = document.getElementById('detail-hint');
-    if(!state.selectedPedido){
-      panel.innerHTML = '<div class="detail-empty">Selecione um pedido acima para ver as viagens realizadas.</div>';
+
+    if(!state.selectedPedidos.length){
+      panel.innerHTML = '<div class="detail-empty">Selecione um ou mais pedidos acima para ver as viagens realizadas.</div>';
       hint.textContent = '';
+      Object.keys(state.detailCharts).forEach(function(k){ state.detailCharts[k].destroy(); });
+      state.detailCharts = {};
       return;
     }
-    var p = state.pedidosView.find(function(x){ return x.numero === state.selectedPedido; });
-    if(!p){ panel.innerHTML = '<div class="detail-empty">Pedido não encontrado.</div>'; return; }
-    var allRows = state.entregas.filter(function(r){ return r.numero === p.numero; }).sort(function(a,b){
+
+    var selectedSet = {};
+    state.selectedPedidos.forEach(function(n){ selectedSet[n] = true; });
+    var selectedList = state.pedidosView.filter(function(p){ return selectedSet[p.numero]; });
+
+    hint.textContent = selectedList.length + ' pedido(s) selecionado(s)';
+
+    Object.keys(state.detailCharts).forEach(function(numero){
+      if(!selectedSet[numero]){ state.detailCharts[numero].destroy(); delete state.detailCharts[numero]; }
+    });
+
+    panel.innerHTML = selectedList.map(function(p){ return buildDetailBlockHtml(p); }).join('');
+
+    selectedList.forEach(function(p){ wireDetailBlock(p); });
+  }
+
+  function buildDetailBlockHtml(p){
+    var numero = p.numero;
+    var allRows = state.entregas.filter(function(r){ return r.numero === numero; }).sort(function(a,b){
       var da = a.data ? a.data.getTime() : 0, db = b.data ? b.data.getTime() : 0;
       return da - db;
     });
@@ -752,12 +888,11 @@
       else { valorAPagar += r.freteTotal; }
     });
     var tipos = Object.keys(tipoCounts).sort();
+    var selectedTipos = getTipos(numero);
 
-    var rows = state.selectedTipos.length ?
-      allRows.filter(function(r){ return state.selectedTipos.indexOf(r.tipo || 'Não informado') !== -1; }) :
+    var rows = selectedTipos.length ?
+      allRows.filter(function(r){ return selectedTipos.indexOf(r.tipo || 'Não informado') !== -1; }) :
       allRows;
-
-    hint.textContent = rows.length + ' viagem(ns)' + (state.selectedTipos.length ? ' (filtrado por veículo)' : '');
 
     var statsHtml = p.contratado !== null ?
       '<div class="detail-stats">' +
@@ -773,10 +908,14 @@
       '<div class="detail-stats"><div><p class="stat-label">Entregue</p><p class="stat-value" style="color:var(--amber)">'+fmtNum(toTon(p.entregue),1)+' ton</p></div></div>';
 
     var tipoFilterHtml = tipos.length > 1 ?
-      '<div class="tipo-filter-row" id="tipo-filter-row">' + tipos.map(function(t){
-        var active = state.selectedTipos.indexOf(t) !== -1;
+      '<div class="tipo-filter-row">' + tipos.map(function(t){
+        var active = selectedTipos.indexOf(t) !== -1;
         return '<button type="button" class="tipo-pill'+(active?' active':'')+'" data-tipo="'+t.replace(/"/g,'&quot;')+'">'+t+' <span class="tipo-count">'+tipoCounts[t]+'</span></button>';
       }).join('') + '</div>' : '';
+
+    var range = getChartRange(numero);
+    var period = getChartPeriod(numero);
+    var metric = getChartMetric(numero);
 
     var tableRows = rows.map(function(r){
       return '<tr>' +
@@ -793,97 +932,185 @@
       '</tr>';
     }).join('');
 
-    panel.innerHTML =
-      '<div class="detail-header">' +
-        '<div><h3>Pedido '+p.numero+'</h3><p class="sub">'+(p.cliente||'—')+' &middot; '+(p.produto||'—')+(p.data?' &middot; '+fmtDate(p.data):'')+'</p></div>' +
-        statsHtml +
-        '<button type="button" class="close-detail" id="close-detail-btn">Fechar</button>' +
-      '</div>' +
-      tipoFilterHtml +
-      (rows.length > 1 ? (
-        '<div class="chart-wrap">' +
-          '<div class="chart-head">' +
-            '<h4>Entregas ao longo do tempo</h4>' +
-            '<div class="chart-controls">' +
-              '<div class="period-toggle" id="period-toggle">' +
-                '<button type="button" data-period="dia" class="'+(state.chartPeriod==='dia'?'active':'')+'">Dia</button>' +
-                '<button type="button" data-period="semana" class="'+(state.chartPeriod==='semana'?'active':'')+'">Semana</button>' +
-              '</div>' +
-              '<div class="metric-switch" id="metric-switch">' +
-                '<span class="metric-label'+(state.chartMetric==='viagens'?' active':'')+'" data-metric="viagens">Viagens</span>' +
-                '<button type="button" class="switch-track'+(state.chartMetric==='toneladas'?' on':'')+'" id="metric-switch-btn"><span class="switch-thumb"></span></button>' +
-                '<span class="metric-label'+(state.chartMetric==='toneladas'?' active':'')+'" data-metric="toneladas">Toneladas</span>' +
-              '</div>' +
+    var chartHtml = rows.length > 1 ? (
+      '<div class="chart-wrap">' +
+        '<div class="chart-head">' +
+          '<h4>Entregas ao longo do tempo</h4>' +
+          '<div class="chart-controls">' +
+            '<div class="period-toggle">' +
+              '<button type="button" data-period="dia" class="'+(period==='dia'?'active':'')+'">Dia</button>' +
+              '<button type="button" data-period="semana" class="'+(period==='semana'?'active':'')+'">Semana</button>' +
+            '</div>' +
+            '<div class="date-range-filter">' +
+              '<label>De <input type="date" class="range-start" value="'+(range.start||'')+'"></label>' +
+              '<label>Até <input type="date" class="range-end" value="'+(range.end||'')+'"></label>' +
+              (range.start || range.end ? '<button type="button" class="clear-range">Limpar</button>' : '') +
+            '</div>' +
+            '<div class="metric-switch">' +
+              '<span class="metric-label'+(metric==='viagens'?' active':'')+'" data-metric="viagens">Viagens</span>' +
+              '<button type="button" class="switch-track'+(metric==='toneladas'?' on':'')+'" data-role="metric-switch-btn"><span class="switch-thumb"></span></button>' +
+              '<span class="metric-label'+(metric==='toneladas'?' active':'')+'" data-metric="toneladas">Toneladas</span>' +
             '</div>' +
           '</div>' +
-          '<div style="position:relative;height:180px;"><canvas id="detail-chart" role="img" aria-label="Gráfico de entregas ao longo do tempo"></canvas></div>' +
-        '</div>'
-      ) : '') +
-      (rows.length === 0 ?
-        '<div class="empty-state">Nenhuma viagem lançada ainda para este pedido'+(state.selectedTipos.length?' com este tipo de veículo':'')+'.</div>' :
-        '<div class="table-wrap"><table><thead><tr><th>Data</th><th>Motorista</th><th>Placa</th><th>Tipo</th><th>NF</th><th>Ct-e</th><th class="num">Peso</th><th class="num">R$/kg</th><th class="num">Frete</th><th>Situação</th></tr></thead><tbody>'+tableRows+'</tbody></table></div>');
+        '</div>' +
+        '<div style="position:relative;height:180px;"><canvas id="detail-chart-'+numero+'" role="img" aria-label="Gráfico de entregas ao longo do tempo"></canvas></div>' +
+      '</div>'
+    ) : '';
 
-    document.getElementById('close-detail-btn').addEventListener('click', function(){
-      state.selectedPedido = null;
-      state.selectedTipos = [];
-      renderCards();
-      renderDetail();
-    });
+    var bodyHtml = rows.length === 0 ?
+      '<div class="empty-state">Nenhuma viagem lançada ainda para este pedido'+(selectedTipos.length?' com este tipo de veículo':'')+'.</div>' :
+      '<div class="table-wrap"><table><thead><tr><th>Data</th><th>Motorista</th><th>Placa</th><th>Tipo</th><th>NF</th><th>Ct-e</th><th class="num">Peso</th><th class="num">R$/kg</th><th class="num">Frete</th><th>Situação</th></tr></thead><tbody>'+tableRows+'</tbody></table></div>';
 
-    if(tipos.length > 1){
-      document.querySelectorAll('#tipo-filter-row .tipo-pill').forEach(function(btn){
-        btn.addEventListener('click', function(){
-          var t = btn.getAttribute('data-tipo');
-          var idx = state.selectedTipos.indexOf(t);
-          if(idx === -1) state.selectedTipos.push(t); else state.selectedTipos.splice(idx,1);
-          renderDetail();
-        });
-      });
-    }
+    return (
+      '<div class="detail-block" data-pedido="'+numero+'">' +
+        '<div class="detail-header">' +
+          '<div><h3>Pedido '+numero+'</h3><p class="sub">'+(p.cliente||'—')+' &middot; '+(p.produto||'—')+(p.data?' &middot; '+fmtDate(p.data):'')+' &middot; '+rows.length+' viagem(ns)'+(selectedTipos.length?' (filtrado por veículo)':'')+'</p></div>' +
+          statsHtml +
+          '<button type="button" class="close-detail" data-role="close-detail">Fechar</button>' +
+        '</div>' +
+        tipoFilterHtml +
+        chartHtml +
+        bodyHtml +
+      '</div>'
+    );
+  }
 
-    if(rows.length > 1){
-      document.querySelectorAll('#period-toggle button').forEach(function(btn){
-        btn.addEventListener('click', function(){
-          state.chartPeriod = btn.getAttribute('data-period');
-          renderDetail();
-        });
-      });
-      var switchBtn = document.getElementById('metric-switch-btn');
-      switchBtn.addEventListener('click', function(){
-        state.chartMetric = state.chartMetric === 'viagens' ? 'toneladas' : 'viagens';
+  function wireDetailBlock(p){
+    var numero = p.numero;
+    var panel = document.getElementById('detail-panel');
+    var block = panel.querySelector('.detail-block[data-pedido="'+numero+'"]');
+    if(!block) return;
+
+    var closeBtn = block.querySelector('[data-role="close-detail"]');
+    if(closeBtn){
+      closeBtn.addEventListener('click', function(){
+        var idx = state.selectedPedidos.indexOf(numero);
+        if(idx !== -1) state.selectedPedidos.splice(idx,1);
+        renderCards();
         renderDetail();
       });
-      document.querySelectorAll('#metric-switch .metric-label').forEach(function(lbl){
-        lbl.addEventListener('click', function(){
-          state.chartMetric = lbl.getAttribute('data-metric');
-          renderDetail();
-        });
-      });
+    }
 
-      if(state.detailChart) state.detailChart.destroy();
-      var muted = '#9B9B9D', gridColor = '#2A2C2F', amber = '#FBA832';
-      var grouped = groupChartData(rows, state.chartPeriod);
-      var isTon = state.chartMetric === 'toneladas';
-      state.detailChart = new Chart(document.getElementById('detail-chart'), {
-        type:'bar',
-        data:{
-          labels: grouped.map(function(g){ return g.label; }),
-          datasets:[{
-            label: isTon ? 'Toneladas' : 'Viagens',
-            data: grouped.map(function(g){ return isTon ? g.toneladas : g.viagens; }),
-            backgroundColor: amber, borderRadius:3, maxBarThickness:36
-          }]
-        },
-        options:{
-          responsive:true, maintainAspectRatio:false,
-          plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:function(ctx){ return isTon ? (fmtNum(ctx.parsed.y,2)+' ton') : (fmtNum(ctx.parsed.y,0)+' viagem(ns)'); } } } },
-          scales:{
-            x:{ ticks:{ color:muted }, grid:{ display:false } },
-            y:{ ticks:{ color:muted, precision:isTon?1:0, callback:function(v){return fmtNum(v,isTon?1:0);} }, grid:{ color:gridColor } }
-          }
-        }
+    block.querySelectorAll('.tipo-pill').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var t = btn.getAttribute('data-tipo');
+        var tipos = getTipos(numero);
+        var idx = tipos.indexOf(t);
+        if(idx === -1) tipos.push(t); else tipos.splice(idx,1);
+        renderDetail();
+      });
+    });
+
+    block.querySelectorAll('.period-toggle button').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        state.chartPeriodByPedido[numero] = btn.getAttribute('data-period');
+        renderDetail();
+      });
+    });
+
+    var rangeStart = block.querySelector('.range-start');
+    var rangeEnd = block.querySelector('.range-end');
+    if(rangeStart){
+      rangeStart.addEventListener('change', function(){
+        getChartRange(numero).start = rangeStart.value;
+        renderDetail();
       });
     }
+    if(rangeEnd){
+      rangeEnd.addEventListener('change', function(){
+        getChartRange(numero).end = rangeEnd.value;
+        renderDetail();
+      });
+    }
+    var clearRange = block.querySelector('.clear-range');
+    if(clearRange){
+      clearRange.addEventListener('click', function(){
+        var r = getChartRange(numero);
+        r.start = ''; r.end = '';
+        renderDetail();
+      });
+    }
+
+    var switchBtn = block.querySelector('[data-role="metric-switch-btn"]');
+    if(switchBtn){
+      switchBtn.addEventListener('click', function(){
+        state.chartMetricByPedido[numero] = getChartMetric(numero) === 'viagens' ? 'toneladas' : 'viagens';
+        renderDetail();
+      });
+    }
+    block.querySelectorAll('.metric-label').forEach(function(lbl){
+      lbl.addEventListener('click', function(){
+        state.chartMetricByPedido[numero] = lbl.getAttribute('data-metric');
+        renderDetail();
+      });
+    });
+
+    var canvas = document.getElementById('detail-chart-' + numero);
+    if(!canvas) return;
+
+    var allRows = state.entregas.filter(function(r){ return r.numero === numero; });
+    var selectedTipos = getTipos(numero);
+    var rows = selectedTipos.length ?
+      allRows.filter(function(r){ return selectedTipos.indexOf(r.tipo || 'Não informado') !== -1; }) :
+      allRows;
+
+    var range = getChartRange(numero);
+    var startDt = parseISODateInput(range.start);
+    var endDt = parseISODateInput(range.end);
+    var chartRows = rows;
+    if(startDt){ chartRows = chartRows.filter(function(r){ return r.data && r.data.getTime() >= startDt.getTime(); }); }
+    if(endDt){ var endLimit = new Date(endDt.getTime()); endLimit.setHours(23,59,59,999); chartRows = chartRows.filter(function(r){ return r.data && r.data.getTime() <= endLimit.getTime(); }); }
+
+    if(state.detailCharts[numero]) state.detailCharts[numero].destroy();
+
+    var muted = '#9B9B9D', gridColor = '#2A2C2F', amber = '#FBA832', textColor = '#F3F2EE';
+    var period = getChartPeriod(numero);
+    var metric = getChartMetric(numero);
+    var grouped = groupChartData(chartRows, period);
+    var isTon = metric === 'toneladas';
+
+    var totalizerPlugin = {
+      id: 'totalizer',
+      afterDatasetsDraw: function(chart){
+        var ctx = chart.ctx;
+        var meta = chart.getDatasetMeta(0);
+        if(!meta) return;
+        ctx.save();
+        ctx.fillStyle = textColor;
+        ctx.font = "600 10.5px 'JetBrains Mono', monospace";
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        meta.data.forEach(function(bar, index){
+          var value = chart.data.datasets[0].data[index];
+          if(value === undefined || value === null) return;
+          var label = isTon ? fmtNum(value,1) : fmtNum(value,0);
+          ctx.fillText(label, bar.x, bar.y - 4);
+        });
+        ctx.restore();
+      }
+    };
+
+    state.detailCharts[numero] = new Chart(canvas, {
+      type:'bar',
+      data:{
+        labels: grouped.map(function(g){ return g.label; }),
+        datasets:[{
+          label: isTon ? 'Toneladas' : 'Viagens',
+          data: grouped.map(function(g){ return isTon ? g.toneladas : g.viagens; }),
+          backgroundColor: amber, borderRadius:3, maxBarThickness:36
+        }]
+      },
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        layout:{ padding:{ top:18 } },
+        plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:function(ctx){ return isTon ? (fmtNum(ctx.parsed.y,2)+' ton') : (fmtNum(ctx.parsed.y,0)+' viagem(ns)'); } } } },
+        scales:{
+          x:{ ticks:{ color:muted }, grid:{ display:false } },
+          y:{ ticks:{ color:muted, precision:isTon?1:0, callback:function(v){return fmtNum(v,isTon?1:0);} }, grid:{ color:gridColor } }
+        }
+      },
+      plugins:[totalizerPlugin]
+    });
   }
 
   function render(){
