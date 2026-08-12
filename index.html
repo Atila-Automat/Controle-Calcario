@@ -8,22 +8,26 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#2A2A2C;
-    --surface:#333335;
-    --surface-2:#3C3C3F;
-    --border:#4E4E51;
-    --border-soft:#434345;
+    --bg:#F7F7F5;
+    --surface:#FFFFFF;
+    --surface-2:#F1F0EC;
+    --border:#E3E2DC;
+    --border-soft:#EBEAE5;
     --charcoal:#4B4B4D;
-    --charcoal-light:#8A8A8C;
+    --charcoal-light:#8B8A85;
     --orange:#F06135;
     --orange-text:#F06135;
-    --orange-dim:rgba(240,97,53,0.14);
+    --orange-dim:rgba(240,97,53,0.10);
     --amber:#FBA832;
-    --amber-text:#FBA832;
-    --amber-dim:rgba(251,168,50,0.14);
-    --text:#F3F2EE;
-    --muted:#9B9B9D;
-    --faint:#6E6E70;
+    --amber-text:#C97A12;
+    --amber-dim:rgba(251,168,50,0.12);
+    --green:#1E9E63;
+    --green-dim:rgba(30,158,99,0.10);
+    --red:#E23B3B;
+    --red-dim:rgba(226,59,59,0.10);
+    --text:#1F1F21;
+    --muted:#6B6B6E;
+    --faint:#9A9A9C;
     --font-display:'Barlow',sans-serif;
     --font-mono:'JetBrains Mono',monospace;
     --radius:10px;
@@ -73,7 +77,7 @@
     transition:border-color .15s, background .15s, color .15s;
   }
   button:hover{border-color:var(--charcoal-light);}
-  button.primary{background:var(--orange);color:#1a0a04;border-color:var(--orange);}
+  button.primary{background:var(--orange);color:#FFFFFF;border-color:var(--orange);}
   button.primary:hover{background:#FF7847;}
 
   /* ---------- LAYOUT CONGELADO ---------- */
@@ -206,14 +210,14 @@
     gap:7px;
   }
   .status-pill:hover{border-color:var(--charcoal-light);color:var(--text);}
-  .status-pill.active[data-status="nao-iniciado"]{background:rgba(255,255,255,0.08);border-color:var(--charcoal-light);color:var(--text);}
+  .status-pill.active[data-status="nao-iniciado"]{background:rgba(0,0,0,0.05);border-color:var(--charcoal-light);color:var(--text);}
   .status-pill.active[data-status="andamento"]{background:var(--orange-dim);border-color:var(--orange);color:var(--orange-text);}
-  .status-pill.active[data-status="finalizado"]{background:var(--amber-dim);border-color:var(--amber);color:var(--amber-text);}
+  .status-pill.active[data-status="finalizado"]{background:var(--green-dim);border-color:var(--green);color:var(--green);}
   .status-pill .status-count{
     font-family:var(--font-mono);
     font-size:10px;
     font-weight:700;
-    background:rgba(255,255,255,0.1);
+    background:rgba(0,0,0,0.06);
     border-radius:999px;
     padding:1px 7px;
     line-height:1.5;
@@ -250,10 +254,10 @@
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
   .status-chip{font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:4px 9px;border-radius:5px;white-space:nowrap;}
-  .status-chip.finalizado{background:var(--amber-dim);color:var(--amber-text);}
+  .status-chip.finalizado{background:var(--green-dim);color:var(--green);}
   .status-chip.andamento{background:var(--orange-dim);color:var(--orange-text);}
-  .status-chip.nao-iniciado{background:rgba(255,255,255,0.08);color:var(--muted);}
-  .status-chip.sem-cadastro{background:rgba(255,255,255,0.05);color:var(--faint);}
+  .status-chip.nao-iniciado{background:rgba(0,0,0,0.05);color:var(--muted);}
+  .status-chip.sem-cadastro{background:rgba(0,0,0,0.035);color:var(--faint);}
 
   .ring-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
   .ring-id h3{margin:0;font-size:18px;font-weight:700;font-family:var(--font-mono);}
@@ -269,13 +273,13 @@
   .status-viagem .stat-label{margin:0 0 6px;}
   .status-viagem-row{display:flex;justify-content:space-between;font-size:12px;font-family:var(--font-mono);padding:2px 0;}
   .status-viagem-row .label{color:var(--faint);}
-  .status-viagem-row.atendido .value{color:var(--amber-text);font-weight:600;}
-  .status-viagem-row.pendente .value{color:var(--orange-text);font-weight:600;}
+  .status-viagem-row.atendido .value{color:var(--orange);font-weight:600;}
+  .status-viagem-row.pendente .value{color:var(--red);font-weight:600;}
 
   .stat-label{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:0 0 3px;}
   .stat-value{font-size:15px;font-weight:600;font-family:var(--font-mono);margin:0;}
-  .stat-value.hi{color:var(--amber-text);}
-  .stat-value.lo{color:var(--orange-text);}
+  .stat-value.hi{color:var(--orange);}
+  .stat-value.lo{color:var(--red);}
 
   .empty-state{padding:40px 20px;text-align:center;color:var(--muted);border:1px dashed var(--border);border-radius:var(--radius);font-size:13px;}
 
@@ -339,7 +343,7 @@
   }
   .metric-switch{display:flex;align-items:center;gap:8px;}
   .metric-switch .metric-label{font-size:11px;font-weight:600;color:var(--faint);text-transform:uppercase;letter-spacing:.04em;cursor:pointer;transition:color .15s;}
-  .metric-switch .metric-label.active{color:var(--amber-text);}
+  .metric-switch .metric-label.active{color:var(--orange);}
   .switch-track{position:relative;width:42px;height:22px;border-radius:999px;background:var(--border);border:1px solid var(--border);cursor:pointer;padding:0;flex-shrink:0;}
   .switch-thumb{position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--amber);transition:left .15s;}
   .switch-track.on .switch-thumb{left:22px;}
@@ -821,14 +825,15 @@
     return Object.keys(map).map(function(k){ return map[k]; }).sort(function(a,b){ return a.key - b.key; });
   }
 
-  function ringSvg(pct){
+  function ringSvg(pct, statusColor){
     var r = 24, c = 2*Math.PI*r;
     var p = Math.max(0, Math.min(100, pct||0));
     var offset = c * (1 - p/100);
+    var color = statusColor || '#F06135';
     return '<svg class="ring-svg" width="56" height="56" viewBox="0 0 56 56">' +
-      '<circle cx="28" cy="28" r="'+r+'" fill="none" stroke="#454A52" stroke-width="6"/>' +
-      '<circle cx="28" cy="28" r="'+r+'" fill="none" stroke="#FBA832" stroke-width="6" stroke-linecap="round" stroke-dasharray="'+c.toFixed(1)+'" stroke-dashoffset="'+offset.toFixed(1)+'" transform="rotate(-90 28 28)"/>' +
-      '<text x="28" y="32" text-anchor="middle" font-family="JetBrains Mono" font-size="12.5" font-weight="600" fill="#F3F2EE">'+fmtNum(p,0)+'%</text>' +
+      '<circle cx="28" cy="28" r="'+r+'" fill="none" stroke="#E3E2DC" stroke-width="6"/>' +
+      '<circle cx="28" cy="28" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="6" stroke-linecap="round" stroke-dasharray="'+c.toFixed(1)+'" stroke-dashoffset="'+offset.toFixed(1)+'" transform="rotate(-90 28 28)"/>' +
+      '<text x="28" y="32" text-anchor="middle" font-family="JetBrains Mono" font-size="12.5" font-weight="600" fill="#1F1F21">'+fmtNum(p,0)+'%</text>' +
     '</svg>';
   }
 
@@ -846,7 +851,7 @@
     }
     grid.innerHTML = list.map(function(p){
       var selected = state.selectedPedidos.indexOf(p.numero) !== -1;
-      var ring = p.contratado !== null ? ringSvg(p.pct) : '';
+      var ring = p.contratado !== null ? ringSvg(p.pct, p.status === 'finalizado' ? '#1E9E63' : '#F06135') : '';
       var statsHtml = p.contratado !== null ?
         '<div class="ring-stats">' +
           '<div class="stat"><p class="stat-label">Contratado</p><p class="stat-value">'+fmtNum(toTon(p.contratado),1)+' ton</p></div>' +
@@ -945,15 +950,15 @@
     var statsHtml = p.contratado !== null ?
       '<div class="detail-stats">' +
         '<div><p class="stat-label">Contratado</p><p class="stat-value">'+fmtNum(toTon(p.contratado),1)+' ton</p></div>' +
-        '<div><p class="stat-label">Atendido</p><p class="stat-value" style="color:var(--amber-text)">'+fmtNum(toTon(p.entregue),1)+' ton</p></div>' +
-        '<div><p class="stat-label">Falta</p><p class="stat-value" style="color:var(--orange-text)">'+fmtNum(toTon(p.falta),1)+' ton</p></div>' +
+        '<div><p class="stat-label">Atendido</p><p class="stat-value" style="color:var(--orange)">'+fmtNum(toTon(p.entregue),1)+' ton</p></div>' +
+        '<div><p class="stat-label">Falta</p><p class="stat-value" style="color:var(--red)">'+fmtNum(toTon(p.falta),1)+' ton</p></div>' +
         (p.valorTonelada ? '<div><p class="stat-label">Valor/ton</p><p class="stat-value">'+fmtCurrency(p.valorTonelada)+'</p></div>' : '') +
         '<div><p class="stat-label">Frete total</p><p class="stat-value">'+fmtCurrencyCompact(p.frete)+'</p></div>' +
-        '<div><p class="stat-label">Valor pago</p><p class="stat-value" style="color:var(--amber-text)">'+fmtCurrencyCompact(valorPago)+'</p></div>' +
-        '<div><p class="stat-label">Valor a pagar</p><p class="stat-value" style="color:var(--orange-text)">'+fmtCurrencyCompact(valorAPagar)+'</p></div>' +
+        '<div><p class="stat-label">Valor pago</p><p class="stat-value" style="color:var(--orange)">'+fmtCurrencyCompact(valorPago)+'</p></div>' +
+        '<div><p class="stat-label">Valor a pagar</p><p class="stat-value" style="color:var(--red)">'+fmtCurrencyCompact(valorAPagar)+'</p></div>' +
       '</div>'
       :
-      '<div class="detail-stats"><div><p class="stat-label">Entregue</p><p class="stat-value" style="color:var(--amber-text)">'+fmtNum(toTon(p.entregue),1)+' ton</p></div></div>';
+      '<div class="detail-stats"><div><p class="stat-label">Entregue</p><p class="stat-value" style="color:var(--orange)">'+fmtNum(toTon(p.entregue),1)+' ton</p></div></div>';
 
     var tipoFilterHtml = tipos.length > 1 ?
       '<div class="tipo-filter-row">' + tipos.map(function(t){
@@ -1111,7 +1116,7 @@
 
     if(state.detailCharts[numero]) state.detailCharts[numero].destroy();
 
-    var muted = '#9B9B9D', gridColor = '#2A2C2F', amber = '#FBA832', textColor = '#F3F2EE';
+    var muted = '#6B6B6E', gridColor = '#E9E8E3', amber = '#F06135', textColor = '#1F1F21';
     var period = getChartPeriod(numero);
     var metric = getChartMetric(numero);
     var grouped = groupChartData(chartRows, period);
