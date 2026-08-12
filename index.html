@@ -245,7 +245,20 @@
   .status-pill.active .status-count{background:rgba(0,0,0,0.18);}
 
   /* ---------- PEDIDO CARDS ---------- */
-  .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
+  .pedidos-split{display:grid;grid-template-columns:1.15fr 1fr;gap:20px;align-items:start;}
+  .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px;}
+  .pedido-summary-panel{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-detail);
+    box-shadow:var(--shadow-detail);
+    padding:20px clamp(14px,2vw,24px);
+    min-height:100%;
+  }
+  .pedido-summary-panel .detail-empty{padding:50px 10px;}
+  @media (max-width:900px){
+    .pedidos-split{grid-template-columns:1fr;}
+  }
   .pedido-card{
     position:relative;
     background:var(--surface);
@@ -319,6 +332,11 @@
   .detail-empty{color:var(--muted);font-size:13px;text-align:center;padding:30px 10px;}
   .detail-block{margin:0 0 30px;}
   .detail-block + .detail-block{padding-top:26px;border-top:1px solid var(--border-soft);}
+  .table-block{margin:0 0 30px;}
+  .table-block + .table-block{padding-top:26px;border-top:1px solid var(--border-soft);}
+  .table-block-head{display:flex;align-items:baseline;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+  .table-block-head h4{margin:0;font-size:16px;font-weight:700;font-family:var(--font-mono);font-variant-numeric:tabular-nums;color:var(--text);}
+  .table-block-head span{font-size:12px;color:var(--muted);}
   .detail-header{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid var(--border);}
   .detail-header h3{margin:0 0 4px;font-size:22px;font-weight:700;font-family:var(--font-mono);font-variant-numeric:tabular-nums;letter-spacing:-.01em;color:var(--text);}
   .detail-header .sub{font-size:13px;color:var(--muted);}
@@ -439,7 +457,12 @@
         <h2>Pedidos</h2>
         <span id="card-count"></span>
       </div>
-      <div class="card-grid" id="card-grid"></div>
+      <div class="pedidos-split">
+        <div class="card-grid" id="card-grid"></div>
+        <div class="pedido-summary-panel" id="pedido-summary-panel">
+          <div class="detail-empty">Selecione um pedido ao lado para ver o resumo e o gráfico.</div>
+        </div>
+      </div>
     </section>
 
   </div>
@@ -934,11 +957,13 @@
   }
 
   function renderDetail(){
-    var panel = document.getElementById('detail-panel');
+    var summaryPanel = document.getElementById('pedido-summary-panel');
+    var tablePanel = document.getElementById('detail-panel');
     var hint = document.getElementById('detail-hint');
 
     if(!state.selectedPedidos.length){
-      panel.innerHTML = '<div class="detail-empty">Selecione um ou mais pedidos acima para ver as viagens realizadas.</div>';
+      summaryPanel.innerHTML = '<div class="detail-empty">Selecione um pedido ao lado para ver o resumo e o gráfico.</div>';
+      tablePanel.innerHTML = '<div class="detail-empty">Selecione um ou mais pedidos acima para ver as viagens realizadas.</div>';
       hint.textContent = '';
       Object.keys(state.detailCharts).forEach(function(k){ state.detailCharts[k].destroy(); });
       state.detailCharts = {};
@@ -955,12 +980,13 @@
       if(!selectedSet[numero]){ state.detailCharts[numero].destroy(); delete state.detailCharts[numero]; }
     });
 
-    panel.innerHTML = selectedList.map(function(p){ return buildDetailBlockHtml(p); }).join('');
+    summaryPanel.innerHTML = selectedList.map(function(p){ return buildSummaryHtml(p); }).join('');
+    tablePanel.innerHTML = selectedList.map(function(p){ return buildTableHtml(p); }).join('');
 
     selectedList.forEach(function(p){ wireDetailBlock(p); });
   }
 
-  function buildDetailBlockHtml(p){
+  function buildSummaryHtml(p){
     var numero = p.numero;
     var allRows = state.entregas.filter(function(r){ return r.numero === numero; }).sort(function(a,b){
       var da = a.data ? a.data.getTime() : 0, db = b.data ? b.data.getTime() : 0;
@@ -1006,21 +1032,6 @@
     var period = getChartPeriod(numero);
     var metric = getChartMetric(numero);
 
-    var tableRows = rows.map(function(r){
-      return '<tr>' +
-        '<td>'+fmtDate(r.data)+'</td>' +
-        '<td>'+(r.motorista||'—')+'</td>' +
-        '<td>'+(r.placa||'—')+'</td>' +
-        '<td>'+(r.tipo||'—')+'</td>' +
-        '<td>'+(r.nf||'—')+'</td>' +
-        '<td>'+(r.cte||'—')+'</td>' +
-        '<td class="num">'+fmtNum(toTon(r.pesoNF),2)+' ton</td>' +
-        '<td class="num">'+fmtCurrency(r.valorKg)+'</td>' +
-        '<td class="num">'+fmtCurrencyCompact(r.freteTotal)+'</td>' +
-        '<td>'+(r.situacao ? '<span class="situacao-badge'+(normKey(r.situacao)==='pago'?' pago':'')+'">'+r.situacao+'</span>' : '—')+'</td>' +
-      '</tr>';
-    }).join('');
-
     var chartHtml = rows.length > 1 ? (
       '<div class="chart-wrap">' +
         '<div class="chart-head">' +
@@ -1046,19 +1057,52 @@
       '</div>'
     ) : '';
 
+    return (
+      '<div class="detail-block" data-pedido="'+numero+'">' +
+        '<div class="detail-header">' +
+          '<div><h3>Pedido '+numero+'</h3><p class="sub">'+(p.cliente||'—')+' &middot; '+(p.produto||'—')+(p.data?' &middot; '+fmtDate(p.data):'')+' &middot; '+rows.length+' viagem(ns)'+(selectedTipos.length?' (filtrado por veículo)':'')+'</p></div>' +
+          '<button type="button" class="close-detail" data-role="close-detail">Fechar</button>' +
+        '</div>' +
+        statsHtml +
+        tipoFilterHtml +
+        chartHtml +
+      '</div>'
+    );
+  }
+
+  function buildTableHtml(p){
+    var numero = p.numero;
+    var allRows = state.entregas.filter(function(r){ return r.numero === numero; }).sort(function(a,b){
+      var da = a.data ? a.data.getTime() : 0, db = b.data ? b.data.getTime() : 0;
+      return da - db;
+    });
+    var selectedTipos = getTipos(numero);
+    var rows = selectedTipos.length ?
+      allRows.filter(function(r){ return selectedTipos.indexOf(r.tipo || 'Não informado') !== -1; }) :
+      allRows;
+
+    var tableRows = rows.map(function(r){
+      return '<tr>' +
+        '<td>'+fmtDate(r.data)+'</td>' +
+        '<td>'+(r.motorista||'—')+'</td>' +
+        '<td>'+(r.placa||'—')+'</td>' +
+        '<td>'+(r.tipo||'—')+'</td>' +
+        '<td>'+(r.nf||'—')+'</td>' +
+        '<td>'+(r.cte||'—')+'</td>' +
+        '<td class="num">'+fmtNum(toTon(r.pesoNF),2)+' ton</td>' +
+        '<td class="num">'+fmtCurrency(r.valorKg)+'</td>' +
+        '<td class="num">'+fmtCurrencyCompact(r.freteTotal)+'</td>' +
+        '<td>'+(r.situacao ? '<span class="situacao-badge'+(normKey(r.situacao)==='pago'?' pago':'')+'">'+r.situacao+'</span>' : '—')+'</td>' +
+      '</tr>';
+    }).join('');
+
     var bodyHtml = rows.length === 0 ?
       '<div class="empty-state">Nenhuma viagem lançada ainda para este pedido'+(selectedTipos.length?' com este tipo de veículo':'')+'.</div>' :
       '<div class="table-wrap"><table><thead><tr><th>Data</th><th>Motorista</th><th>Placa</th><th>Tipo</th><th>NF</th><th>Ct-e</th><th class="num">Peso</th><th class="num">R$/kg</th><th class="num">Frete</th><th>Situação</th></tr></thead><tbody>'+tableRows+'</tbody></table></div>';
 
     return (
-      '<div class="detail-block" data-pedido="'+numero+'">' +
-        '<div class="detail-header">' +
-          '<div><h3>Pedido '+numero+'</h3><p class="sub">'+(p.cliente||'—')+' &middot; '+(p.produto||'—')+(p.data?' &middot; '+fmtDate(p.data):'')+' &middot; '+rows.length+' viagem(ns)'+(selectedTipos.length?' (filtrado por veículo)':'')+'</p></div>' +
-          statsHtml +
-          '<button type="button" class="close-detail" data-role="close-detail">Fechar</button>' +
-        '</div>' +
-        tipoFilterHtml +
-        chartHtml +
+      '<div class="table-block" data-pedido="'+numero+'">' +
+        '<div class="table-block-head"><h4>Pedido '+numero+'</h4><span>'+(p.cliente||'—')+' &middot; '+rows.length+' viagem(ns)</span></div>' +
         bodyHtml +
       '</div>'
     );
@@ -1066,8 +1110,8 @@
 
   function wireDetailBlock(p){
     var numero = p.numero;
-    var panel = document.getElementById('detail-panel');
-    var block = panel.querySelector('.detail-block[data-pedido="'+numero+'"]');
+    var summaryPanel = document.getElementById('pedido-summary-panel');
+    var block = summaryPanel.querySelector('.detail-block[data-pedido="'+numero+'"]');
     if(!block) return;
 
     var closeBtn = block.querySelector('[data-role="close-detail"]');
