@@ -245,7 +245,9 @@
   .status-pill.active .status-count{background:rgba(0,0,0,0.18);}
 
   /* ---------- PEDIDO CARDS ---------- */
-  .pedidos-split{display:grid;grid-template-columns:1.15fr 1fr;gap:20px;align-items:start;}
+  .top-split{display:grid;grid-template-columns:minmax(300px,400px) 1fr;gap:24px;align-items:start;}
+  .top-split-left{min-width:0;}
+  .top-split-right{min-width:0;position:sticky;top:0;}
   .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px;}
   .pedido-summary-panel{
     background:var(--surface);
@@ -253,11 +255,12 @@
     border-radius:var(--radius-detail);
     box-shadow:var(--shadow-detail);
     padding:20px clamp(14px,2vw,24px);
-    min-height:100%;
+    min-height:280px;
   }
   .pedido-summary-panel .detail-empty{padding:50px 10px;}
   @media (max-width:900px){
-    .pedidos-split{grid-template-columns:1fr;}
+    .top-split{grid-template-columns:1fr;}
+    .top-split-right{position:static;}
   }
   .pedido-card{
     position:relative;
@@ -337,17 +340,17 @@
   .table-block-head{display:flex;align-items:baseline;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
   .table-block-head h4{margin:0;font-size:16px;font-weight:700;font-family:var(--font-mono);font-variant-numeric:tabular-nums;color:var(--text);}
   .table-block-head span{font-size:12px;color:var(--muted);}
-  .detail-header{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid var(--border);}
-  .detail-header h3{margin:0 0 4px;font-size:22px;font-weight:700;font-family:var(--font-mono);font-variant-numeric:tabular-nums;letter-spacing:-.01em;color:var(--text);}
-  .detail-header .sub{font-size:13px;color:var(--muted);}
-  .detail-stats{display:flex;gap:0;flex-wrap:wrap;}
-  .detail-stats > div{padding:0 20px;border-left:1px solid var(--border-soft);}
+  .detail-header{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+  .detail-header h3{margin:0 0 3px;font-size:16px;font-weight:700;font-family:var(--font-mono);font-variant-numeric:tabular-nums;letter-spacing:-.01em;color:var(--text);}
+  .detail-header .sub{font-size:11px;color:var(--muted);}
+  .detail-stats{display:flex;gap:0;flex-wrap:wrap;margin-bottom:6px;}
+  .detail-stats > div{padding:0 14px;border-left:1px solid var(--border-soft);}
   .detail-stats > div:first-child{border-left:none;padding-left:0;}
-  .detail-stats .stat-label{color:var(--muted);}
-  .detail-stats .stat-value{font-size:18px;}
+  .detail-stats .stat-label{color:var(--muted);font-size:9.5px;margin:0 0 2px;}
+  .detail-stats .stat-value{font-size:14px;}
   .close-detail{align-self:flex-start;}
 
-  .tipo-filter-row{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 20px;}
+  .tipo-filter-row{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px;}
   .tipo-pill{
     font-family:var(--font-display);
     font-weight:600;
@@ -367,7 +370,7 @@
   .tipo-pill.active{background:var(--orange);border-color:var(--orange);color:#FFFFFF;}
   .tipo-pill .tipo-count{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:10.5px;opacity:.8;}
 
-  .chart-wrap{margin:20px 0 26px;background:var(--surface-2);border:1px solid var(--border);border-radius:14px;padding:16px 18px;}
+  .chart-wrap{margin:14px 0 0;background:var(--surface-2);border:1px solid var(--border);border-radius:14px;padding:16px 18px;}
   .chart-wrap h4{margin:0;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600;}
   .chart-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:14px;}
   .chart-controls{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
@@ -442,28 +445,35 @@
 
     <div id="status-banner"></div>
 
-    <section class="status-filter-section">
-      <p class="filter-label">Filtrar por situação</p>
-      <div class="status-filter-row" id="status-filter-row"></div>
-    </section>
+    <div class="top-split">
+      <div class="top-split-left">
 
-    <section class="filter-section">
-      <p class="filter-label">Filtrar por cliente (selecione um ou mais)</p>
-      <div class="client-row" id="client-row"></div>
-    </section>
+        <section class="status-filter-section">
+          <p class="filter-label">Filtrar por situação</p>
+          <div class="status-filter-row" id="status-filter-row"></div>
+        </section>
 
-    <section class="block">
-      <div class="block-title">
-        <h2>Pedidos</h2>
-        <span id="card-count"></span>
+        <section class="filter-section">
+          <p class="filter-label">Filtrar por cliente (selecione um ou mais)</p>
+          <div class="client-row" id="client-row"></div>
+        </section>
+
+        <section class="block">
+          <div class="block-title">
+            <h2>Pedidos</h2>
+            <span id="card-count"></span>
+          </div>
+          <div class="card-grid" id="card-grid"></div>
+        </section>
+
       </div>
-      <div class="pedidos-split">
-        <div class="card-grid" id="card-grid"></div>
+
+      <div class="top-split-right">
         <div class="pedido-summary-panel" id="pedido-summary-panel">
           <div class="detail-empty">Selecione um pedido ao lado para ver o resumo e o gráfico.</div>
         </div>
       </div>
-    </section>
+    </div>
 
   </div>
 
@@ -1053,7 +1063,7 @@
             '</div>' +
           '</div>' +
         '</div>' +
-        '<div style="position:relative;height:180px;"><canvas id="detail-chart-'+numero+'" role="img" aria-label="Gráfico de entregas ao longo do tempo"></canvas></div>' +
+        '<div style="position:relative;height:230px;"><canvas id="detail-chart-'+numero+'" role="img" aria-label="Gráfico de entregas ao longo do tempo"></canvas></div>' +
       '</div>'
     ) : '';
 
