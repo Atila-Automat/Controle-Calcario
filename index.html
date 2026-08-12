@@ -8,20 +8,22 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#2A2A2C;
-    --surface:#333335;
-    --surface-2:#3C3C3F;
-    --border:#4E4E51;
-    --border-soft:#434345;
+    --bg:#909093;
+    --surface:#9C9C9F;
+    --surface-2:#A8A8AB;
+    --border:#6E6E71;
+    --border-soft:#7C7C7F;
     --charcoal:#4B4B4D;
-    --charcoal-light:#8A8A8C;
+    --charcoal-light:#57575A;
     --orange:#F06135;
-    --orange-dim:rgba(240,97,53,0.14);
+    --orange-text:#9C3D1E;
+    --orange-dim:rgba(240,97,53,0.20);
     --amber:#FBA832;
-    --amber-dim:rgba(251,168,50,0.14);
-    --text:#F3F2EE;
-    --muted:#9B9B9D;
-    --faint:#6E6E70;
+    --amber-text:#8A5B12;
+    --amber-dim:rgba(251,168,50,0.22);
+    --text:#242426;
+    --muted:#48484B;
+    --faint:#55555A;
     --font-display:'Barlow',sans-serif;
     --font-mono:'JetBrains Mono',monospace;
     --radius:10px;
@@ -54,7 +56,7 @@
   .header-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:13px;position:relative;z-index:1;}
   .brand{display:flex;align-items:center;gap:10px;}
   .brand img{height:36px;width:auto;display:block;}
-  .brand-text .eyebrow{margin:0;font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--amber);font-weight:600;}
+  .brand-text .eyebrow{margin:0;font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--amber-text);font-weight:600;}
   .brand-text h1{margin:1px 0 0;font-size:clamp(14px,1.8vw,19px);font-weight:700;letter-spacing:.01em;text-transform:uppercase;}
   .header-meta{display:flex;align-items:center;gap:10px;}
   #last-updated{font-size:9px;color:var(--muted);font-family:var(--font-mono);}
@@ -120,7 +122,7 @@
     background:var(--orange-dim);
     font-size:13px;
   }
-  #status-banner strong{color:var(--orange);}
+  #status-banner strong{color:var(--orange-text);}
   .upload-row{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;align-items:center;}
   .upload-row label{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:4px;}
   .upload-row input[type=file]{font-family:var(--font-mono);font-size:11px;color:var(--text);}
@@ -140,8 +142,8 @@
   .kpi-label{margin:0 0 8px;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);}
   .kpi-value{margin:0;font-size:23px;font-weight:700;font-family:var(--font-mono);}
   .kpi-value span{font-size:12px;font-weight:400;color:var(--muted);margin-left:4px;}
-  .kpi.amber .kpi-value{color:var(--amber);}
-  .kpi.orange .kpi-value{color:var(--orange);}
+  .kpi.amber .kpi-value{color:var(--amber-text);}
+  .kpi.orange .kpi-value{color:var(--orange-text);}
 
   /* ---------- STATUS FILTER (agora acima do filtro de cliente) ---------- */
   .status-filter-section{
@@ -204,14 +206,14 @@
     gap:7px;
   }
   .status-pill:hover{border-color:var(--charcoal-light);color:var(--text);}
-  .status-pill.active[data-status="nao-iniciado"]{background:rgba(255,255,255,0.08);border-color:var(--charcoal-light);color:var(--text);}
-  .status-pill.active[data-status="andamento"]{background:var(--orange-dim);border-color:var(--orange);color:var(--orange);}
-  .status-pill.active[data-status="finalizado"]{background:var(--amber-dim);border-color:var(--amber);color:var(--amber);}
+  .status-pill.active[data-status="nao-iniciado"]{background:rgba(0,0,0,0.08);border-color:var(--charcoal-light);color:var(--text);}
+  .status-pill.active[data-status="andamento"]{background:var(--orange-dim);border-color:var(--orange);color:var(--orange-text);}
+  .status-pill.active[data-status="finalizado"]{background:var(--amber-dim);border-color:var(--amber);color:var(--amber-text);}
   .status-pill .status-count{
     font-family:var(--font-mono);
     font-size:10px;
     font-weight:700;
-    background:rgba(255,255,255,0.1);
+    background:rgba(0,0,0,0.1);
     border-radius:999px;
     padding:1px 7px;
     line-height:1.5;
@@ -248,10 +250,10 @@
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
   .status-chip{font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:4px 9px;border-radius:5px;white-space:nowrap;}
-  .status-chip.finalizado{background:var(--amber-dim);color:var(--amber);}
-  .status-chip.andamento{background:var(--orange-dim);color:var(--orange);}
-  .status-chip.nao-iniciado{background:rgba(255,255,255,0.08);color:var(--muted);}
-  .status-chip.sem-cadastro{background:rgba(255,255,255,0.05);color:var(--faint);}
+  .status-chip.finalizado{background:var(--amber-dim);color:var(--amber-text);}
+  .status-chip.andamento{background:var(--orange-dim);color:var(--orange-text);}
+  .status-chip.nao-iniciado{background:rgba(0,0,0,0.08);color:var(--muted);}
+  .status-chip.sem-cadastro{background:rgba(0,0,0,0.05);color:var(--faint);}
 
   .ring-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
   .ring-id h3{margin:0;font-size:18px;font-weight:700;font-family:var(--font-mono);}
@@ -267,13 +269,13 @@
   .status-viagem .stat-label{margin:0 0 6px;}
   .status-viagem-row{display:flex;justify-content:space-between;font-size:12px;font-family:var(--font-mono);padding:2px 0;}
   .status-viagem-row .label{color:var(--faint);}
-  .status-viagem-row.atendido .value{color:var(--amber);font-weight:600;}
-  .status-viagem-row.pendente .value{color:var(--orange);font-weight:600;}
+  .status-viagem-row.atendido .value{color:var(--amber-text);font-weight:600;}
+  .status-viagem-row.pendente .value{color:var(--orange-text);font-weight:600;}
 
   .stat-label{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:0 0 3px;}
   .stat-value{font-size:15px;font-weight:600;font-family:var(--font-mono);margin:0;}
-  .stat-value.hi{color:var(--amber);}
-  .stat-value.lo{color:var(--orange);}
+  .stat-value.hi{color:var(--amber-text);}
+  .stat-value.lo{color:var(--orange-text);}
 
   .empty-state{padding:40px 20px;text-align:center;color:var(--muted);border:1px dashed var(--border);border-radius:var(--radius);font-size:13px;}
 
@@ -337,7 +339,7 @@
   }
   .metric-switch{display:flex;align-items:center;gap:8px;}
   .metric-switch .metric-label{font-size:11px;font-weight:600;color:var(--faint);text-transform:uppercase;letter-spacing:.04em;cursor:pointer;transition:color .15s;}
-  .metric-switch .metric-label.active{color:var(--amber);}
+  .metric-switch .metric-label.active{color:var(--amber-text);}
   .switch-track{position:relative;width:42px;height:22px;border-radius:999px;background:var(--border);border:1px solid var(--border);cursor:pointer;padding:0;flex-shrink:0;}
   .switch-thumb{position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--amber);transition:left .15s;}
   .switch-track.on .switch-thumb{left:22px;}
@@ -514,6 +516,31 @@
   }
   function fmtCurrency(n){
     return n.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+  }
+  function abbreviateNumber(n){
+    var abs = Math.abs(n);
+    var sign = n < 0 ? '-' : '';
+    if(abs >= 1000000){
+      var v = abs/1000000;
+      var s = v.toFixed(1).replace('.', ',');
+      if(s.slice(-2) === ',0') s = s.slice(0, -2);
+      return sign + s + 'M';
+    }
+    if(abs >= 1000){
+      var v2 = abs/1000;
+      var s2 = v2.toFixed(1).replace('.', ',');
+      if(s2.slice(-2) === ',0') s2 = s2.slice(0, -2);
+      return sign + s2 + 'K';
+    }
+    return null;
+  }
+  function fmtNumCompact(n, decimals){
+    var abbr = abbreviateNumber(n);
+    return abbr !== null ? abbr : fmtNum(n, decimals);
+  }
+  function fmtCurrencyCompact(n){
+    var abbr = abbreviateNumber(n);
+    return abbr !== null ? ('R$ ' + abbr) : fmtCurrency(n);
   }
   function toTon(kg){ return kg/1000; }
   function roundHalfUp(n){
@@ -799,9 +826,9 @@
     var p = Math.max(0, Math.min(100, pct||0));
     var offset = c * (1 - p/100);
     return '<svg class="ring-svg" width="56" height="56" viewBox="0 0 56 56">' +
-      '<circle cx="28" cy="28" r="'+r+'" fill="none" stroke="#454A52" stroke-width="6"/>' +
+      '<circle cx="28" cy="28" r="'+r+'" fill="none" stroke="#B7B7BA" stroke-width="6"/>' +
       '<circle cx="28" cy="28" r="'+r+'" fill="none" stroke="#FBA832" stroke-width="6" stroke-linecap="round" stroke-dasharray="'+c.toFixed(1)+'" stroke-dashoffset="'+offset.toFixed(1)+'" transform="rotate(-90 28 28)"/>' +
-      '<text x="28" y="32" text-anchor="middle" font-family="JetBrains Mono" font-size="12.5" font-weight="600" fill="#F3F2EE">'+fmtNum(p,0)+'%</text>' +
+      '<text x="28" y="32" text-anchor="middle" font-family="JetBrains Mono" font-size="12.5" font-weight="600" fill="#242426">'+fmtNum(p,0)+'%</text>' +
     '</svg>';
   }
 
@@ -822,9 +849,9 @@
       var ring = p.contratado !== null ? ringSvg(p.pct) : '';
       var statsHtml = p.contratado !== null ?
         '<div class="ring-stats">' +
-          '<div class="stat"><p class="stat-label">Contratado</p><p class="stat-value">'+fmtNum(toTon(p.contratado),1)+' ton</p></div>' +
-          '<div class="stat"><p class="stat-label">Atendido</p><p class="stat-value hi">'+fmtNum(toTon(p.entregue),1)+' ton</p></div>' +
-          '<div class="stat"><p class="stat-label">Falta</p><p class="stat-value lo">'+fmtNum(toTon(p.falta),1)+' ton</p></div>' +
+          '<div class="stat"><p class="stat-label">Contratado</p><p class="stat-value">'+fmtNumCompact(toTon(p.contratado),1)+' ton</p></div>' +
+          '<div class="stat"><p class="stat-label">Atendido</p><p class="stat-value hi">'+fmtNumCompact(toTon(p.entregue),1)+' ton</p></div>' +
+          '<div class="stat"><p class="stat-label">Falta</p><p class="stat-value lo">'+fmtNumCompact(toTon(p.falta),1)+' ton</p></div>' +
         '</div>' +
         '<div class="status-viagem">' +
           '<p class="stat-label">Status viagem</p>' +
@@ -832,7 +859,7 @@
           '<div class="status-viagem-row pendente"><span class="label">Pendente</span><span class="value">'+p.viagensPendentes+' viagem(ns)</span></div>' +
         '</div>'
         :
-        '<div class="ring-stats"><div class="stat"><p class="stat-label">Entregue (sem pedido cadastrado)</p><p class="stat-value hi">'+fmtNum(toTon(p.entregue),1)+' ton</p></div></div>' +
+        '<div class="ring-stats"><div class="stat"><p class="stat-label">Entregue (sem pedido cadastrado)</p><p class="stat-value hi">'+fmtNumCompact(toTon(p.entregue),1)+' ton</p></div></div>' +
         '<div class="status-viagem"><div class="status-viagem-row atendido"><span class="label">Atendido</span><span class="value">'+p.viagens+' viagem(ns)</span></div></div>';
       return (
         '<div class="pedido-card'+(selected?' selected':'')+'" data-pedido="'+p.numero+'">' +
@@ -917,16 +944,16 @@
 
     var statsHtml = p.contratado !== null ?
       '<div class="detail-stats">' +
-        '<div><p class="stat-label">Contratado</p><p class="stat-value">'+fmtNum(toTon(p.contratado),1)+' ton</p></div>' +
-        '<div><p class="stat-label">Atendido</p><p class="stat-value" style="color:var(--amber)">'+fmtNum(toTon(p.entregue),1)+' ton</p></div>' +
-        '<div><p class="stat-label">Falta</p><p class="stat-value" style="color:var(--orange)">'+fmtNum(toTon(p.falta),1)+' ton</p></div>' +
+        '<div><p class="stat-label">Contratado</p><p class="stat-value">'+fmtNumCompact(toTon(p.contratado),1)+' ton</p></div>' +
+        '<div><p class="stat-label">Atendido</p><p class="stat-value" style="color:var(--amber-text)">'+fmtNumCompact(toTon(p.entregue),1)+' ton</p></div>' +
+        '<div><p class="stat-label">Falta</p><p class="stat-value" style="color:var(--orange-text)">'+fmtNumCompact(toTon(p.falta),1)+' ton</p></div>' +
         (p.valorTonelada ? '<div><p class="stat-label">Valor/ton</p><p class="stat-value">'+fmtCurrency(p.valorTonelada)+'</p></div>' : '') +
-        '<div><p class="stat-label">Frete total</p><p class="stat-value">'+fmtCurrency(p.frete)+'</p></div>' +
-        '<div><p class="stat-label">Valor pago</p><p class="stat-value" style="color:var(--amber)">'+fmtCurrency(valorPago)+'</p></div>' +
-        '<div><p class="stat-label">Valor a pagar</p><p class="stat-value" style="color:var(--orange)">'+fmtCurrency(valorAPagar)+'</p></div>' +
+        '<div><p class="stat-label">Frete total</p><p class="stat-value">'+fmtCurrencyCompact(p.frete)+'</p></div>' +
+        '<div><p class="stat-label">Valor pago</p><p class="stat-value" style="color:var(--amber-text)">'+fmtCurrencyCompact(valorPago)+'</p></div>' +
+        '<div><p class="stat-label">Valor a pagar</p><p class="stat-value" style="color:var(--orange-text)">'+fmtCurrencyCompact(valorAPagar)+'</p></div>' +
       '</div>'
       :
-      '<div class="detail-stats"><div><p class="stat-label">Entregue</p><p class="stat-value" style="color:var(--amber)">'+fmtNum(toTon(p.entregue),1)+' ton</p></div></div>';
+      '<div class="detail-stats"><div><p class="stat-label">Entregue</p><p class="stat-value" style="color:var(--amber-text)">'+fmtNumCompact(toTon(p.entregue),1)+' ton</p></div></div>';
 
     var tipoFilterHtml = tipos.length > 1 ?
       '<div class="tipo-filter-row">' + tipos.map(function(t){
@@ -946,9 +973,9 @@
         '<td>'+(r.tipo||'—')+'</td>' +
         '<td>'+(r.nf||'—')+'</td>' +
         '<td>'+(r.cte||'—')+'</td>' +
-        '<td class="num">'+fmtNum(toTon(r.pesoNF),2)+' ton</td>' +
+        '<td class="num">'+fmtNumCompact(toTon(r.pesoNF),2)+' ton</td>' +
         '<td class="num">'+fmtCurrency(r.valorKg)+'</td>' +
-        '<td class="num">'+fmtCurrency(r.freteTotal)+'</td>' +
+        '<td class="num">'+fmtCurrencyCompact(r.freteTotal)+'</td>' +
         '<td>'+(r.situacao||'—')+'</td>' +
       '</tr>';
     }).join('');
@@ -1084,7 +1111,7 @@
 
     if(state.detailCharts[numero]) state.detailCharts[numero].destroy();
 
-    var muted = '#9B9B9D', gridColor = '#2A2C2F', amber = '#FBA832', textColor = '#F3F2EE';
+    var muted = '#48484B', gridColor = '#B7B7BA', amber = '#FBA832', textColor = '#242426';
     var period = getChartPeriod(numero);
     var metric = getChartMetric(numero);
     var grouped = groupChartData(chartRows, period);
