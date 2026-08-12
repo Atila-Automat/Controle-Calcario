@@ -96,6 +96,18 @@
     overflow-y:auto;
     padding-bottom:40px;
   }
+  .scroll-bottom.expanded{
+    position:fixed;
+    top:var(--header-h, 70px);
+    left:0;
+    right:0;
+    bottom:0;
+    z-index:50;
+    background:var(--bg);
+    padding:0 clamp(16px,3vw,40px) 40px;
+    overflow-y:auto;
+  }
+  #expand-detail-btn{flex-shrink:0;}
 
   /* ---------- STATUS BANNER ---------- */
   #status-banner{
@@ -399,8 +411,11 @@
 
     <section class="block">
       <div class="block-title">
-        <h2>Detalhamento</h2>
-        <span id="detail-hint"></span>
+        <div class="block-title-left">
+          <h2>Detalhamento</h2>
+          <span id="detail-hint"></span>
+        </div>
+        <button id="expand-detail-btn" type="button">Expandir</button>
       </div>
       <div id="detail-panel">
         <div class="detail-empty">Selecione um ou mais pedidos acima para ver as viagens realizadas.</div>
@@ -677,8 +692,11 @@
   }
 
   function clientList(){
+    var base = state.selectedStatuses.length ?
+      state.pedidosView.filter(function(p){ return state.selectedStatuses.indexOf(p.status) !== -1; }) :
+      state.pedidosView;
     var set = {};
-    state.pedidosView.forEach(function(p){ if(p.cliente && p.cliente !== '—') set[p.cliente] = true; });
+    base.forEach(function(p){ if(p.cliente && p.cliente !== '—') set[p.cliente] = true; });
     return Object.keys(set).sort();
   }
 
@@ -719,6 +737,9 @@
         var s = btn.getAttribute('data-status');
         var idx = state.selectedStatuses.indexOf(s);
         if(idx === -1) state.selectedStatuses.push(s); else state.selectedStatuses.splice(idx,1);
+        var validClients = clientList();
+        state.selectedClients = state.selectedClients.filter(function(c){ return validClients.indexOf(c) !== -1; });
+        renderClientRow();
         renderCards();
         renderStatusFilterRow();
       });
@@ -1129,6 +1150,12 @@
   syncHeaderHeight();
 
   document.getElementById('refresh-btn').addEventListener('click', loadData);
+
+  document.getElementById('expand-detail-btn').addEventListener('click', function(){
+    var scrollBottom = document.querySelector('.scroll-bottom');
+    var expanded = scrollBottom.classList.toggle('expanded');
+    this.textContent = expanded ? 'Recolher' : 'Expandir';
+  });
 
   loadData();
 })();
