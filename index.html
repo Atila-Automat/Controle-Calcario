@@ -169,43 +169,102 @@
   .kpi.amber .kpi-value{color:var(--amber-text);}
   .kpi.orange .kpi-value{color:var(--orange-text);}
 
-  /* ---------- STATUS FILTER (agora acima do filtro de cliente) ---------- */
-  .status-filter-section{
+  /* ---------- FILTERS ROW (caixas de dropdown lado a lado) ---------- */
+  .filters-row{
     position:sticky;
     top:0;
     z-index:36;
     background:var(--bg);
     padding:14px 0 12px;
     border-bottom:1px solid var(--border-soft);
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
   }
-
-  /* ---------- CLIENT FILTER ---------- */
-  .filter-section{
-    position:sticky;
-    top:0;
-    z-index:35;
-    background:var(--bg);
-    padding:13px 0 10px;
-    margin-bottom:10px;
-    border-bottom:1px solid var(--border-soft);
-  }
-  .filter-label{font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:0 0 7px;}
-  .client-row{display:flex;gap:7px;flex-wrap:wrap;}
-  .client-pill{
-    font-family:var(--font-display);
-    font-weight:600;
-    font-size:12px;
-    padding:6px 13px;
-    border-radius:999px;
-    border:1px solid var(--border);
+  .filter-dropdown{position:relative;flex:1 1 220px;min-width:200px;}
+  .filter-label{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:0 0 6px;}
+  .filter-trigger{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    width:100%;
     background:var(--surface);
-    color:var(--text);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:10px 12px;
     cursor:pointer;
-    transition:all .15s;
+    font-family:var(--font-display);
+    text-align:left;
+    transition:border-color .15s, background .15s;
   }
-  .client-pill:hover{border-color:var(--orange-border);background:var(--orange-dim);}
-  .client-pill.active{background:var(--orange);border-color:var(--orange);color:#FFFFFF;}
-  .client-pill.active::before{content:"✓ ";}
+  .filter-trigger:hover{border-color:var(--orange-border);}
+  .filter-trigger.open{border-color:var(--orange);}
+  .filter-trigger.has-value{background:var(--orange-dim);border-color:var(--orange-border);}
+  .filter-trigger-text{
+    font-size:13px;
+    font-weight:600;
+    color:var(--text);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    display:flex;
+    align-items:center;
+    gap:7px;
+    min-width:0;
+  }
+  .filter-trigger.has-value .filter-trigger-text{color:var(--orange-text);}
+  .filter-trigger-dot{width:7px;height:7px;border-radius:50%;background:var(--orange);flex-shrink:0;display:none;}
+  .filter-trigger.has-value .filter-trigger-dot{display:block;}
+  .filter-trigger-chevron{font-size:15px;color:var(--muted);flex-shrink:0;transition:transform .15s;}
+  .filter-trigger.open .filter-trigger-chevron{transform:rotate(180deg);color:var(--orange-text);}
+  .filter-panel{
+    position:absolute;
+    top:calc(100% + 6px);
+    left:0;
+    right:0;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow-card-hover);
+    z-index:50;
+    max-height:280px;
+    overflow-y:auto;
+    padding:6px;
+    display:none;
+  }
+  .filter-panel.open{display:block;}
+  .filter-option{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:8px 10px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:13px;
+    color:var(--text);
+    transition:background .12s;
+  }
+  .filter-option:hover{background:var(--border-soft);}
+  .filter-option.active{background:var(--orange-dim);color:var(--orange-text);font-weight:600;}
+  .filter-option-check{
+    width:15px;height:15px;border-radius:4px;border:1.5px solid var(--border);flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .filter-option.active .filter-option-check{background:var(--orange);border-color:var(--orange);color:#FFFFFF;font-size:10px;}
+  .filter-option-label{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .filter-option-count{
+    font-family:var(--font-mono);
+    font-size:10px;
+    font-weight:700;
+    color:var(--muted);
+    background:var(--border-soft);
+    border-radius:999px;
+    padding:1px 7px;
+    flex-shrink:0;
+  }
+  .filter-option.active .filter-option-count{background:rgba(234,88,12,0.14);color:var(--orange-text);}
 
   /* ---------- SECTIONS ---------- */
   section.block{margin:34px 0;}
@@ -213,36 +272,6 @@
   .block-title-left{display:flex;align-items:center;flex-wrap:wrap;gap:14px;}
   .block-title h2{margin:0;font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
   .block-title span{font-size:11.5px;color:var(--muted);font-family:var(--font-mono);}
-  .status-filter-row{display:flex;gap:8px;flex-wrap:wrap;}
-  .status-pill{
-    font-family:var(--font-display);
-    font-weight:600;
-    font-size:11.5px;
-    padding:6px 13px;
-    border-radius:999px;
-    border:1px solid var(--border);
-    background:transparent;
-    color:var(--muted);
-    cursor:pointer;
-    transition:all .15s;
-    display:inline-flex;
-    align-items:center;
-    gap:7px;
-  }
-  .status-pill:hover{border-color:var(--charcoal-light);color:var(--text);}
-  .status-pill.active[data-status="nao-iniciado"]{background:#F3F4F6;border-color:#D1D5DB;color:#4B5563;}
-  .status-pill.active[data-status="andamento"]{background:var(--orange-dim);border-color:var(--orange);color:var(--orange-text);}
-  .status-pill.active[data-status="finalizado"]{background:var(--green-dim);border-color:var(--green);color:var(--green);}
-  .status-pill .status-count{
-    font-family:var(--font-mono);
-    font-size:10px;
-    font-weight:700;
-    background:rgba(0,0,0,0.06);
-    border-radius:999px;
-    padding:1px 7px;
-    line-height:1.5;
-  }
-  .status-pill.active .status-count{background:rgba(0,0,0,0.18);}
 
   /* ---------- PEDIDO CARDS ---------- */
   .top-split{display:grid;grid-template-columns:minmax(300px,400px) 1fr;gap:24px;align-items:start;}
@@ -268,13 +297,12 @@
     border:1px solid var(--border);
     border-radius:var(--radius-card);
     box-shadow:var(--shadow-card);
-    padding:18px 20px 16px;
+    padding:18px 20px 18px;
     cursor:pointer;
     transition:border-color .2s, transform .2s, background .2s, box-shadow .2s;
     text-align:left;
     display:flex;
     flex-direction:column;
-    height:100%;
     overflow:hidden;
   }
   .pedido-card:hover{border-color:var(--orange-border);transform:translateY(-2px);box-shadow:var(--shadow-card-hover);}
@@ -448,14 +476,24 @@
     <div class="top-split">
       <div class="top-split-left">
 
-        <section class="status-filter-section">
-          <p class="filter-label">Filtrar por situação</p>
-          <div class="status-filter-row" id="status-filter-row"></div>
-        </section>
+        <section class="filters-row">
+          <div class="filter-dropdown" id="status-filter-dropdown">
+            <p class="filter-label">Situação</p>
+            <button type="button" class="filter-trigger" id="status-filter-trigger">
+              <span class="filter-trigger-text"><span class="filter-trigger-dot"></span><span id="status-filter-trigger-label">Todas as situações</span></span>
+              <span class="filter-trigger-chevron" aria-hidden="true">▾</span>
+            </button>
+            <div class="filter-panel" id="status-filter-panel"></div>
+          </div>
 
-        <section class="filter-section">
-          <p class="filter-label">Filtrar por cliente (selecione um ou mais)</p>
-          <div class="client-row" id="client-row"></div>
+          <div class="filter-dropdown" id="client-filter-dropdown">
+            <p class="filter-label">Cliente</p>
+            <button type="button" class="filter-trigger" id="client-filter-trigger">
+              <span class="filter-trigger-text"><span class="filter-trigger-dot"></span><span id="client-filter-trigger-label">Selecione um ou mais</span></span>
+              <span class="filter-trigger-chevron" aria-hidden="true">▾</span>
+            </button>
+            <div class="filter-panel" id="client-filter-panel"></div>
+          </div>
         </section>
 
         <section class="block">
@@ -813,21 +851,62 @@
     return counts;
   }
 
+  var STATUS_OPTIONS = [
+    {key:'nao-iniciado', label:'Não atendido'},
+    {key:'andamento', label:'Em andamento'},
+    {key:'finalizado', label:'Finalizado'}
+  ];
+
+  function closeAllFilterDropdowns(except){
+    ['status','client'].forEach(function(key){
+      if(key === except) return;
+      var trigger = document.getElementById(key+'-filter-trigger');
+      var panel = document.getElementById(key+'-filter-panel');
+      if(trigger) trigger.classList.remove('open');
+      if(panel) panel.classList.remove('open');
+    });
+  }
+
+  function toggleFilterDropdown(key){
+    var trigger = document.getElementById(key+'-filter-trigger');
+    var panel = document.getElementById(key+'-filter-panel');
+    var isOpen = panel.classList.contains('open');
+    closeAllFilterDropdowns();
+    if(!isOpen){ trigger.classList.add('open'); panel.classList.add('open'); }
+  }
+
+  document.addEventListener('click', function(e){
+    if(!e.target.closest('.filter-dropdown')) closeAllFilterDropdowns();
+  });
+
   function renderStatusFilterRow(){
-    var STATUS_OPTIONS = [
-      {key:'nao-iniciado', label:'Não atendido'},
-      {key:'andamento', label:'Em andamento'},
-      {key:'finalizado', label:'Finalizado'}
-    ];
     var counts = statusCounts();
-    var row = document.getElementById('status-filter-row');
-    row.innerHTML = STATUS_OPTIONS.map(function(o){
-      var active = state.selectedStatuses.indexOf(o.key) !== -1;
-      return '<button type="button" class="status-pill'+(active?' active':'')+'" data-status="'+o.key+'">'+o.label+' <span class="status-count">'+(counts[o.key]||0)+'</span></button>';
+    var trigger = document.getElementById('status-filter-trigger');
+    var label = document.getElementById('status-filter-trigger-label');
+    var panel = document.getElementById('status-filter-panel');
+
+    var selected = state.selectedStatuses;
+    if(!selected.length){ label.textContent = 'Todas as situações'; trigger.classList.remove('has-value'); }
+    else if(selected.length === 1){
+      var opt = STATUS_OPTIONS.filter(function(o){ return o.key === selected[0]; })[0];
+      label.textContent = opt.label + ' (' + (counts[opt.key]||0) + ')';
+      trigger.classList.add('has-value');
+    } else {
+      label.textContent = selected.length + ' situações selecionadas';
+      trigger.classList.add('has-value');
+    }
+
+    panel.innerHTML = STATUS_OPTIONS.map(function(o){
+      var active = selected.indexOf(o.key) !== -1;
+      return '<div class="filter-option'+(active?' active':'')+'" data-status="'+o.key+'">' +
+        '<span class="filter-option-check">'+(active?'✓':'')+'</span>' +
+        '<span class="filter-option-label">'+o.label+'</span>' +
+        '<span class="filter-option-count">'+(counts[o.key]||0)+'</span>' +
+      '</div>';
     }).join('');
-    row.querySelectorAll('.status-pill').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        var s = btn.getAttribute('data-status');
+    panel.querySelectorAll('.filter-option').forEach(function(opt){
+      opt.addEventListener('click', function(){
+        var s = opt.getAttribute('data-status');
         var idx = state.selectedStatuses.indexOf(s);
         if(idx === -1) state.selectedStatuses.push(s); else state.selectedStatuses.splice(idx,1);
         var validClients = clientList();
@@ -837,25 +916,39 @@
         renderStatusFilterRow();
       });
     });
+
+    trigger.onclick = function(){ toggleFilterDropdown('status'); };
   }
 
   function renderClientRow(){
     var clients = clientList();
-    var row = document.getElementById('client-row');
-    var html = clients.map(function(c){
-      var active = state.selectedClients.indexOf(c) !== -1;
-      return '<button type="button" class="client-pill' + (active?' active':'') + '" data-client="'+c.replace(/"/g,'&quot;')+'">'+c+'</button>';
+    var trigger = document.getElementById('client-filter-trigger');
+    var label = document.getElementById('client-filter-trigger-label');
+    var panel = document.getElementById('client-filter-panel');
+
+    var selected = state.selectedClients;
+    if(!selected.length){ label.textContent = 'Selecione um ou mais'; trigger.classList.remove('has-value'); }
+    else if(selected.length === 1){ label.textContent = selected[0]; trigger.classList.add('has-value'); }
+    else { label.textContent = selected.length + ' clientes selecionados'; trigger.classList.add('has-value'); }
+
+    panel.innerHTML = clients.map(function(c){
+      var active = selected.indexOf(c) !== -1;
+      return '<div class="filter-option'+(active?' active':'')+'" data-client="'+c.replace(/"/g,'&quot;')+'">' +
+        '<span class="filter-option-check">'+(active?'✓':'')+'</span>' +
+        '<span class="filter-option-label">'+c+'</span>' +
+      '</div>';
     }).join('');
-    row.innerHTML = html;
-    row.querySelectorAll('.client-pill').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        var c = btn.getAttribute('data-client');
+    panel.querySelectorAll('.filter-option').forEach(function(opt){
+      opt.addEventListener('click', function(){
+        var c = opt.getAttribute('data-client');
         var idx = state.selectedClients.indexOf(c);
         if(idx === -1) state.selectedClients.push(c); else state.selectedClients.splice(idx,1);
         state.selectedPedidos = [];
         render();
       });
     });
+
+    trigger.onclick = function(){ toggleFilterDropdown('client'); };
   }
 
   function startOfWeek(d){
@@ -921,20 +1014,6 @@
     grid.innerHTML = list.map(function(p){
       var selected = state.selectedPedidos.indexOf(p.numero) !== -1;
       var ring = p.contratado !== null ? ringSvg(p.pct) : '';
-      var statsHtml = p.contratado !== null ?
-        '<div class="ring-stats">' +
-          '<div class="stat"><p class="stat-label">Contratado</p><p class="stat-value">'+fmtNum(toTon(p.contratado),1)+' ton</p></div>' +
-          '<div class="stat"><p class="stat-label">Atendido</p><p class="stat-value hi">'+fmtNum(toTon(p.entregue),1)+' ton</p></div>' +
-          '<div class="stat"><p class="stat-label">Falta</p><p class="stat-value lo">'+fmtNum(toTon(p.falta),1)+' ton</p></div>' +
-        '</div>' +
-        '<div class="status-viagem">' +
-          '<p class="stat-label">Status viagem</p>' +
-          '<div class="status-viagem-row atendido"><span class="label">Atendido</span><span class="value">'+p.viagens+' viagem(ns)</span></div>' +
-          '<div class="status-viagem-row pendente"><span class="label">Pendente</span><span class="value">'+p.viagensPendentes+' viagem(ns)</span></div>' +
-        '</div>'
-        :
-        '<div class="ring-stats"><div class="stat"><p class="stat-label">Entregue (sem pedido cadastrado)</p><p class="stat-value hi">'+fmtNum(toTon(p.entregue),1)+' ton</p></div></div>' +
-        '<div class="status-viagem"><div class="status-viagem-row atendido"><span class="label">Atendido</span><span class="value">'+p.viagens+' viagem(ns)</span></div></div>';
       return (
         '<div class="pedido-card'+(selected?' selected':'')+'" data-pedido="'+p.numero+'">' +
           '<div class="ring-top">' +
@@ -946,7 +1025,6 @@
             '</div>' +
             ring +
           '</div>' +
-          statsHtml +
         '</div>'
       );
     }).join('');
@@ -1028,9 +1106,11 @@
         '<div><p class="stat-label">Frete total</p><p class="stat-value">'+fmtCurrencyCompact(p.frete)+'</p></div>' +
         '<div><p class="stat-label">Valor pago</p><p class="stat-value" style="color:var(--orange)">'+fmtCurrencyCompact(valorPago)+'</p></div>' +
         '<div><p class="stat-label">Valor a pagar</p><p class="stat-value" style="color:var(--red)">'+fmtCurrencyCompact(valorAPagar)+'</p></div>' +
+        '<div><p class="stat-label">Viagens atendidas</p><p class="stat-value" style="color:var(--orange)">'+p.viagens+'</p></div>' +
+        '<div><p class="stat-label">Viagens pendentes</p><p class="stat-value" style="color:var(--red)">'+p.viagensPendentes+'</p></div>' +
       '</div>'
       :
-      '<div class="detail-stats"><div><p class="stat-label">Entregue</p><p class="stat-value" style="color:var(--orange)">'+fmtNum(toTon(p.entregue),1)+' ton</p></div></div>';
+      '<div class="detail-stats"><div><p class="stat-label">Entregue</p><p class="stat-value" style="color:var(--orange)">'+fmtNum(toTon(p.entregue),1)+' ton</p></div><div><p class="stat-label">Viagens atendidas</p><p class="stat-value" style="color:var(--orange)">'+p.viagens+'</p></div></div>';
 
     var tipoFilterHtml = tipos.length > 1 ?
       '<div class="tipo-filter-row">' + tipos.map(function(t){
