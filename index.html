@@ -1354,27 +1354,25 @@
     var labels = grouped.map(function(g){ return g.label; });
     var actualData = grouped.map(function(g){ return isTon ? g.toneladas : g.viagens; });
 
-    // ---- média móvel (linha de tendência sobre o histórico) ----
-    var trendWindow = period === 'dia' ? 5 : 3;
-    var trendData = actualData.map(function(_, i){
-      var lo = Math.max(0, i - trendWindow + 1);
-      var slice = actualData.slice(lo, i + 1);
-      var sum = slice.reduce(function(a,b){ return a + b; }, 0);
-      return slice.length ? sum / slice.length : null;
-    });
-
-    var futureLabels = [], projData = [], requiredData = null, summaryHtml = '';
+    var futureLabels = [], projData = [], requiredData = null, summaryHtml = '', trendData = null;
 
     if(showProjection && rows.length){
-      // ritmo médio real: total entregue no período (respeitando filtro de veículo) dividido pelos dias corridos desde a 1ª entrega até hoje
-      var datesSorted = rows.map(function(r){ return r.data; }).filter(Boolean).sort(function(a,b){ return a.getTime()-b.getTime(); });
+      // ritmo médio real: soma total (viagens/toneladas) dividida pela quantidade de dias que tiveram viagem (não dias corridos)
       var today = new Date(); today.setHours(0,0,0,0);
-      var firstDate = datesSorted.length ? new Date(datesSorted[0].getFullYear(), datesSorted[0].getMonth(), datesSorted[0].getDate()) : today;
-      var elapsedDays = Math.max(1, Math.round((today.getTime() - firstDate.getTime()) / 86400000) + 1);
+      var activeDaySet = {};
+      rows.forEach(function(r){
+        if(!r.data) return;
+        var k = r.data.getFullYear()+'-'+r.data.getMonth()+'-'+r.data.getDate();
+        activeDaySet[k] = true;
+      });
+      var activeDays = Math.max(1, Object.keys(activeDaySet).length);
       var totalViagensAll = rows.length;
       var totalToneladasAll = rows.reduce(function(s,r){ return s + toTon(r.pesoNF); }, 0);
-      var avgPerDay = isTon ? (totalToneladasAll / elapsedDays) : (totalViagensAll / elapsedDays);
+      var avgPerDay = isTon ? (totalToneladasAll / activeDays) : (totalViagensAll / activeDays);
       var avgPerPeriod = period === 'dia' ? avgPerDay : avgPerDay * 7;
+
+      // linha de tendência = reta única na média que está sendo atendida
+      trendData = actualData.map(function(){ return avgPerPeriod; });
 
       var remaining = isTon ? Math.max(0, toTon(p.falta)) : Math.max(0, p.viagensPendentes);
 
@@ -1431,7 +1429,7 @@
 
     var allLabels = labels.concat(futureLabels);
     var fullActualData = actualData.concat(futureLabels.map(function(){ return null; }));
-    var fullTrendData = trendData.concat(futureLabels.map(function(){ return null; }));
+    var fullTrendData = (trendData || []).concat(futureLabels.map(function(){ return null; }));
     var fullProjData = labels.map(function(){ return null; }).concat(projData);
 
     var datasets = [{
@@ -1445,7 +1443,7 @@
     if(showProjection){
       datasets.push({
         type:'line',
-        label:'Tendência (média móvel)',
+        label:'Tendência (média atendida)',
         data: fullTrendData,
         borderColor: trendColor, backgroundColor: trendColor,
         borderWidth:2, borderDash:[4,3], pointRadius:0, tension:0.25, spanGaps:true, fill:false, order:1
