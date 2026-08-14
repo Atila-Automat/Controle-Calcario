@@ -1332,6 +1332,7 @@
     var actualData = grouped.map(function(g){ return isTon ? g.toneladas : g.viagens; });
 
     var summaryHtml = '', trendData = null;
+    var futureLabels = [], projData = [];
 
     if(showProjection && chartRows.length){
       // ritmo médio no período consultado: soma total (viagens/toneladas) dividida pela quantidade de dias que tiveram viagem dentro desse período
@@ -1351,24 +1352,60 @@
       trendData = actualData.map(function(){ return avgPerPeriod; });
 
       var unitLabel = isTon ? 'ton' : 'viagem(ns)';
-      summaryHtml = '<div><strong>Ritmo médio no período consultado:</strong> ' + fmtNum(avgPerPeriod, 1) + ' ' + unitLabel + '/' + (period==='dia'?'dia':'semana') + ' (com base em ' + activeDays + ' dia(s) com viagem).</div>';
+      var paceTxt = '<div><strong>Ritmo médio no período consultado:</strong> ' + fmtNum(avgPerPeriod, 1) + ' ' + unitLabel + '/' + (period==='dia'?'dia':'semana') + ' (com base em ' + activeDays + ' dia(s) com viagem).</div>';
+
+      // projeção: continuação do gráfico no ritmo atual até zerar o saldo do pedido
+      var remaining = isTon ? Math.max(0, toTon(p.falta)) : Math.max(0, p.viagensPendentes);
+      var completionTxt = '';
+      if(remaining > 0 && grouped.length && avgPerPeriod > 0){
+        var lastKey = grouped[grouped.length-1].key;
+        var stepMs = period === 'dia' ? 86400000 : 7*86400000;
+        var periodsToFinish = Math.min(60, Math.ceil(remaining / avgPerPeriod));
+
+        for(var i=1; i<=periodsToFinish; i++){
+          var bucketDt = new Date(lastKey + stepMs*i);
+          var lbl;
+          if(period === 'semana'){ var iw = isoWeek(bucketDt); lbl = 'Sem ' + iw.week + '/' + iw.year; }
+          else { lbl = fmtDate(bucketDt); }
+          futureLabels.push(lbl);
+          projData.push(avgPerPeriod);
+        }
+
+        var estDate = new Date(lastKey + stepMs*periodsToFinish);
+        completionTxt = '<div>No ritmo atual, o pedido deve terminar em torno de <strong>' + fmtDate(estDate) + '</strong>.</div>';
+      } else if(remaining <= 0){
+        completionTxt = '<div class="pace-ok"><strong>Pedido praticamente concluído</strong> — não há saldo relevante a projetar.</div>';
+      }
+      summaryHtml = paceTxt + completionTxt;
     }
+
+    var allLabels = labels.concat(futureLabels);
+    var fullActualData = actualData.concat(futureLabels.map(function(){ return null; }));
+    var fullTrendData = (trendData || []).concat(futureLabels.map(function(){ return null; }));
+    var fullProjData = labels.map(function(){ return null; }).concat(projData);
 
     var datasets = [{
       type:'bar',
       label: isTon ? 'Toneladas' : 'Viagens',
-      data: actualData,
+      data: fullActualData,
       backgroundColor: barColor, hoverBackgroundColor: barHoverColor, borderRadius:6, maxBarThickness:36,
-      order: 2
+      order: 3
     }];
 
     if(showProjection && trendData){
       datasets.push({
         type:'line',
         label:'Tendência (média atendida)',
-        data: trendData,
+        data: fullTrendData,
         borderColor: trendColor, backgroundColor: trendColor,
         borderWidth:2, borderDash:[4,3], pointRadius:0, tension:0, fill:false, order:1
+      });
+      datasets.push({
+        type:'bar',
+        label:'Projeção (ritmo atual)',
+        data: fullProjData,
+        backgroundColor:'rgba(253,186,116,0.55)', hoverBackgroundColor:'rgba(253,186,116,0.75)', borderRadius:6, maxBarThickness:36,
+        order:2
       });
     }
 
@@ -1395,7 +1432,7 @@
 
     state.detailCharts[numero] = new Chart(canvas, {
       data:{
-        labels: labels,
+        labels: allLabels,
         datasets: datasets
       },
       options:{
