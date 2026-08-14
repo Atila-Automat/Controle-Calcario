@@ -575,7 +575,6 @@
     chartMetricByPedido:{},
     chartRangeByPedido:{},
     chartProjectionByPedido:{},
-    chartDeadlineByPedido:{},
     detailCharts:{}
   };
 
@@ -584,7 +583,6 @@
   function getChartMetric(numero){ return state.chartMetricByPedido[numero] || 'toneladas'; }
   function getChartRange(numero){ return state.chartRangeByPedido[numero] || (state.chartRangeByPedido[numero] = {start:'', end:''}); }
   function getChartProjection(numero){ return state.chartProjectionByPedido[numero] !== undefined ? state.chartProjectionByPedido[numero] : true; }
-  function getChartDeadline(numero){ return state.chartDeadlineByPedido[numero] || ''; }
 
   function normKey(s){
     return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
@@ -1142,7 +1140,6 @@
     var period = getChartPeriod(numero);
     var metric = getChartMetric(numero);
     var showProjection = getChartProjection(numero);
-    var deadline = getChartDeadline(numero);
 
     var chartHtml = rows.length > 1 ? (
       '<div class="chart-wrap">' +
@@ -1167,12 +1164,8 @@
           '<div class="chart-controls chart-controls-projection">' +
             '<label class="projection-toggle-label">' +
               '<button type="button" class="switch-track'+(showProjection?' on':'')+'" data-role="projection-switch-btn"><span class="switch-thumb"></span></button>' +
-              '<span>Tendência e projeção</span>' +
+              '<span>Linha de tendência</span>' +
             '</label>' +
-            '<div class="date-range-filter">' +
-              '<label>Prazo desejado <input type="date" class="projection-deadline" value="'+(deadline||'')+'"></label>' +
-              (deadline ? '<button type="button" class="clear-deadline">Limpar</button>' : '') +
-            '</div>' +
           '</div>' +
         '</div>' +
         '<div style="position:relative;height:230px;"><canvas id="detail-chart-'+numero+'" role="img" aria-label="Gráfico de entregas ao longo do tempo"></canvas></div>' +
@@ -1295,21 +1288,6 @@
       });
     }
 
-    var deadlineInput = block.querySelector('.projection-deadline');
-    if(deadlineInput){
-      deadlineInput.addEventListener('change', function(){
-        state.chartDeadlineByPedido[numero] = deadlineInput.value;
-        renderDetail();
-      });
-    }
-    var clearDeadline = block.querySelector('.clear-deadline');
-    if(clearDeadline){
-      clearDeadline.addEventListener('click', function(){
-        state.chartDeadlineByPedido[numero] = '';
-        renderDetail();
-      });
-    }
-
     var switchBtn = block.querySelector('[data-role="metric-switch-btn"]');
     if(switchBtn){
       switchBtn.addEventListener('click', function(){
@@ -1343,127 +1321,55 @@
     if(state.detailCharts[numero]) state.detailCharts[numero].destroy();
 
     var muted = '#6B7280', gridColor = '#E5E7EB', barColor = '#F97316', barHoverColor = '#EA580C', textColor = '#111827';
-    var trendColor = '#6B7280', projColor = '#FDBA74', requiredColor = '#DC2626';
+    var trendColor = '#6B7280';
     var period = getChartPeriod(numero);
     var metric = getChartMetric(numero);
     var grouped = groupChartData(chartRows, period);
     var isTon = metric === 'toneladas';
     var showProjection = getChartProjection(numero) && p.contratado !== null;
-    var deadlineStr = getChartDeadline(numero);
 
     var labels = grouped.map(function(g){ return g.label; });
     var actualData = grouped.map(function(g){ return isTon ? g.toneladas : g.viagens; });
 
-    var futureLabels = [], projData = [], requiredData = null, summaryHtml = '', trendData = null;
+    var summaryHtml = '', trendData = null;
 
-    if(showProjection && rows.length){
-      // ritmo médio real: soma total (viagens/toneladas) dividida pela quantidade de dias que tiveram viagem (não dias corridos)
-      var today = new Date(); today.setHours(0,0,0,0);
+    if(showProjection && chartRows.length){
+      // ritmo médio no período consultado: soma total (viagens/toneladas) dividida pela quantidade de dias que tiveram viagem dentro desse período
       var activeDaySet = {};
-      rows.forEach(function(r){
+      chartRows.forEach(function(r){
         if(!r.data) return;
         var k = r.data.getFullYear()+'-'+r.data.getMonth()+'-'+r.data.getDate();
         activeDaySet[k] = true;
       });
       var activeDays = Math.max(1, Object.keys(activeDaySet).length);
-      var totalViagensAll = rows.length;
-      var totalToneladasAll = rows.reduce(function(s,r){ return s + toTon(r.pesoNF); }, 0);
-      var avgPerDay = isTon ? (totalToneladasAll / activeDays) : (totalViagensAll / activeDays);
+      var totalViagensPeriodo = chartRows.length;
+      var totalToneladasPeriodo = chartRows.reduce(function(s,r){ return s + toTon(r.pesoNF); }, 0);
+      var avgPerDay = isTon ? (totalToneladasPeriodo / activeDays) : (totalViagensPeriodo / activeDays);
       var avgPerPeriod = period === 'dia' ? avgPerDay : avgPerDay * 7;
 
-      // linha de tendência = reta única na média que está sendo atendida
+      // linha de tendência = reta única na média que está sendo atendida no período consultado
       trendData = actualData.map(function(){ return avgPerPeriod; });
 
-      var remaining = isTon ? Math.max(0, toTon(p.falta)) : Math.max(0, p.viagensPendentes);
-
-      if(remaining > 0 && grouped.length){
-        var lastKey = grouped[grouped.length-1].key;
-        var stepMs = period === 'dia' ? 86400000 : 7*86400000;
-
-        // periodos até concluir no ritmo atual (limitado a 60 barras pra não estourar o gráfico)
-        var periodsToFinish = avgPerPeriod > 0 ? Math.min(60, Math.ceil(remaining / avgPerPeriod)) : 0;
-
-        // periodos até o prazo desejado (se informado)
-        var targetDt = parseISODateInput(deadlineStr);
-        var periodsToDeadline = 0;
-        if(targetDt){
-          var daysAvailable = Math.max(1, Math.ceil((targetDt.getTime() - today.getTime()) / 86400000));
-          periodsToDeadline = period === 'dia' ? daysAvailable : Math.ceil(daysAvailable/7);
-        }
-
-        var totalFuturePeriods = Math.min(60, Math.max(periodsToFinish, periodsToDeadline));
-
-        for(var i=1; i<=totalFuturePeriods; i++){
-          var bucketDt = new Date(lastKey + stepMs*i);
-          var lbl;
-          if(period === 'semana'){ var iw = isoWeek(bucketDt); lbl = 'Sem ' + iw.week + '/' + iw.year; }
-          else { lbl = fmtDate(bucketDt); }
-          futureLabels.push(lbl);
-          projData.push(i <= periodsToFinish ? avgPerPeriod : null);
-        }
-
-        if(targetDt && periodsToDeadline > 0){
-          var requiredPerPeriod = remaining / periodsToDeadline;
-          requiredData = labels.concat(futureLabels).map(function(){ return requiredPerPeriod; });
-        }
-
-        var unitLabel = isTon ? 'ton' : 'viagem(ns)';
-        var estDate = new Date(lastKey + stepMs*periodsToFinish);
-        var paceTxt = '<div><strong>Ritmo médio atual:</strong> ' + fmtNum(avgPerPeriod, isTon?1:1) + ' ' + unitLabel + '/' + (period==='dia'?'dia':'semana') + '. ' +
-          (avgPerPeriod > 0 ? ('No ritmo atual, o pedido deve terminar em torno de <strong>' + fmtDate(estDate) + '</strong>.') : 'Sem ritmo suficiente para estimar a conclusão.') +
-          '</div>';
-
-        var deadlineTxt = '';
-        if(targetDt){
-          var pctDiff = avgPerPeriod > 0 ? ((requiredPerPeriod - avgPerPeriod) / avgPerPeriod) * 100 : null;
-          var cls = requiredPerPeriod <= avgPerPeriod ? 'pace-ok' : 'pace-warn';
-          deadlineTxt = '<div>Para concluir até <strong>' + fmtDate(targetDt) + '</strong>, é necessário enviar <strong class="'+cls+'">' + fmtNum(requiredPerPeriod, 1) + ' ' + unitLabel + '/' + (period==='dia'?'dia':'semana') + '</strong>' +
-            (pctDiff !== null ? (' (' + (pctDiff >= 0 ? pctDiff.toFixed(0)+'% acima' : Math.abs(pctDiff).toFixed(0)+'% abaixo') + ' do ritmo atual)') : '') +
-            '.</div>';
-        }
-        summaryHtml = paceTxt + deadlineTxt;
-      } else if(remaining <= 0){
-        summaryHtml = '<div class="pace-ok"><strong>Pedido praticamente concluído</strong> — não há saldo relevante a projetar.</div>';
-      }
+      var unitLabel = isTon ? 'ton' : 'viagem(ns)';
+      summaryHtml = '<div><strong>Ritmo médio no período consultado:</strong> ' + fmtNum(avgPerPeriod, 1) + ' ' + unitLabel + '/' + (period==='dia'?'dia':'semana') + ' (com base em ' + activeDays + ' dia(s) com viagem).</div>';
     }
-
-    var allLabels = labels.concat(futureLabels);
-    var fullActualData = actualData.concat(futureLabels.map(function(){ return null; }));
-    var fullTrendData = (trendData || []).concat(futureLabels.map(function(){ return null; }));
-    var fullProjData = labels.map(function(){ return null; }).concat(projData);
 
     var datasets = [{
       type:'bar',
       label: isTon ? 'Toneladas' : 'Viagens',
-      data: fullActualData,
+      data: actualData,
       backgroundColor: barColor, hoverBackgroundColor: barHoverColor, borderRadius:6, maxBarThickness:36,
-      order: 3
+      order: 2
     }];
 
-    if(showProjection){
+    if(showProjection && trendData){
       datasets.push({
         type:'line',
         label:'Tendência (média atendida)',
-        data: fullTrendData,
+        data: trendData,
         borderColor: trendColor, backgroundColor: trendColor,
-        borderWidth:2, borderDash:[4,3], pointRadius:0, tension:0.25, spanGaps:true, fill:false, order:1
+        borderWidth:2, borderDash:[4,3], pointRadius:0, tension:0, fill:false, order:1
       });
-      datasets.push({
-        type:'bar',
-        label:'Projeção (ritmo atual)',
-        data: fullProjData,
-        backgroundColor:'rgba(253,186,116,0.55)', hoverBackgroundColor:'rgba(253,186,116,0.75)', borderRadius:6, maxBarThickness:36,
-        order:2
-      });
-      if(requiredData){
-        datasets.push({
-          type:'line',
-          label:'Necessário p/ prazo',
-          data: requiredData,
-          borderColor: requiredColor, backgroundColor: requiredColor,
-          borderWidth:2, borderDash:[2,3], pointRadius:0, tension:0, fill:false, order:0
-        });
-      }
     }
 
     var totalizerPlugin = {
@@ -1489,7 +1395,7 @@
 
     state.detailCharts[numero] = new Chart(canvas, {
       data:{
-        labels: allLabels,
+        labels: labels,
         datasets: datasets
       },
       options:{
