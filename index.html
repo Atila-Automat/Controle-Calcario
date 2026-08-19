@@ -452,6 +452,144 @@
   .situacao-badge{display:inline-block;font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;border:1px solid var(--orange-border);background:var(--orange-dim);color:var(--orange-text);}
   .situacao-badge.pago{border-color:var(--green-border);background:var(--green-dim);color:var(--green);}
 
+  /* ---------- FATURA MODAL ---------- */
+  .fatura-modal-overlay{
+    display:none;
+    position:fixed;inset:0;z-index:200;
+    background:rgba(17,24,39,0.55);
+    align-items:flex-start;justify-content:center;
+    padding:clamp(12px,3vh,40px) 16px;
+    overflow-y:auto;
+  }
+  .fatura-modal{
+    background:var(--surface);
+    border-radius:var(--radius-detail);
+    width:min(1180px, 100%);
+    box-shadow:0 20px 60px rgba(15,23,42,0.35);
+    overflow:hidden;
+  }
+  .fatura-modal-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 24px;border-bottom:1px solid var(--border);
+  }
+  .fatura-modal-head h2{margin:0;font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
+  .fatura-modal-close{
+    border:none;background:transparent;font-size:22px;line-height:1;color:var(--muted);cursor:pointer;padding:2px 6px;border-radius:8px;
+  }
+  .fatura-modal-close:hover{background:var(--border-soft);color:var(--text);}
+  .fatura-modal-body{
+    display:grid;grid-template-columns:320px 1fr;gap:0;
+    max-height:calc(100vh - 140px);
+  }
+  .fatura-form{
+    padding:20px;border-right:1px solid var(--border);overflow-y:auto;
+    display:flex;flex-direction:column;gap:12px;
+  }
+  .field{display:flex;flex-direction:column;gap:5px;flex:none;min-width:0;}
+  .field label{font-size:10.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);}
+  .field input, .field select{
+    font-family:var(--font-display);font-size:13px;color:var(--text);
+    background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 10px;
+  }
+  .field input:focus, .field select:focus{outline:none;border-color:var(--orange);}
+  .field-row{display:flex;gap:10px;}
+  .field-row .field{flex:1;}
+  .field-sm{flex:0 0 60px;}
+  .fatura-form-subtitle{margin:10px 0 -2px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding-top:10px;border-top:1px solid var(--border-soft);}
+  .fatura-config-toggle{margin-top:6px;width:100%;text-align:left;font-size:11.5px;}
+  .fatura-config-panel{max-height:0;overflow:hidden;transition:max-height .2s ease;display:flex;flex-direction:column;gap:10px;}
+  .fatura-config-panel.open{max-height:900px;padding-top:10px;}
+  .fatura-actions{display:flex;gap:10px;margin-top:8px;position:sticky;bottom:0;background:var(--surface);padding-top:10px;}
+  .fatura-actions button{flex:1;}
+
+  .fatura-preview-wrap{background:var(--surface-2);padding:24px;overflow-y:auto;}
+  .inv-doc{
+    background:#FFFFFF;border:1px solid var(--border);border-radius:14px;overflow:hidden;
+    box-shadow:var(--shadow-detail);font-size:12px;color:var(--text);
+  }
+  .inv-doc .inv-topbar{height:6px;background:linear-gradient(90deg, var(--orange), var(--orange-dark));}
+  .inv-head{display:flex;justify-content:space-between;gap:20px;padding:22px 26px 18px;flex-wrap:wrap;}
+  .inv-head-brand{display:flex;gap:12px;align-items:flex-start;}
+  .inv-head-brand img{height:38px;width:auto;}
+  .inv-head-brand div{font-size:11px;color:var(--muted);line-height:1.5;}
+  .inv-head-brand strong{display:block;font-size:13px;color:var(--text);margin-bottom:2px;}
+  .inv-head-doc{text-align:right;}
+  .inv-doc-eyebrow{display:block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--orange-text);font-weight:700;}
+  .inv-doc-number{display:block;font-size:22px;font-weight:800;font-family:var(--font-mono);color:var(--text);margin:2px 0 8px;}
+  .inv-doc-dates{display:flex;gap:16px;justify-content:flex-end;flex-wrap:wrap;}
+  .inv-doc-dates div{text-align:right;}
+  .inv-doc-dates span{display:block;font-size:9.5px;text-transform:uppercase;color:var(--muted);}
+  .inv-doc-dates strong{font-size:12.5px;font-family:var(--font-mono);}
+  .inv-client-card{
+    margin:0 26px 16px;background:var(--surface-2);border:1px solid var(--border-soft);border-radius:12px;
+    padding:14px 16px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px 16px;
+  }
+  .inv-client-card .wide{grid-column:1 / -1;}
+  .inv-client-card span{display:block;font-size:9.5px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);}
+  .inv-client-card strong{font-size:12.5px;font-weight:600;}
+  .inv-strip{display:flex;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:0 26px 16px;}
+  .inv-strip div{flex:1;background:#FFFFFF;padding:10px 14px;}
+  .inv-strip span{display:block;font-size:9.5px;text-transform:uppercase;color:var(--muted);margin-bottom:3px;}
+  .inv-strip strong{font-family:var(--font-mono);font-size:14px;}
+  .inv-warning{
+    margin:0 26px 14px;padding:9px 12px;border:1px solid var(--red);border-left:3px solid var(--red);
+    background:var(--red-dim);color:var(--red);font-size:11.5px;border-radius:8px;
+  }
+  .inv-table-wrap{margin:0 26px 0;border:1px solid var(--border-soft);border-radius:10px;overflow:hidden;}
+  table.inv-table{width:100%;min-width:0;border-collapse:collapse;table-layout:fixed;font-family:var(--font-mono);font-size:10px;}
+  table.inv-table th:nth-child(1), table.inv-table td:nth-child(1){width:10%;}
+  table.inv-table th:nth-child(2), table.inv-table td:nth-child(2){width:16%;}
+  table.inv-table th:nth-child(3), table.inv-table td:nth-child(3){width:8%;}
+  table.inv-table th:nth-child(4), table.inv-table td:nth-child(4){width:10%;}
+  table.inv-table th:nth-child(5), table.inv-table td:nth-child(5){width:7%;}
+  table.inv-table th:nth-child(6), table.inv-table td:nth-child(6){width:9%;}
+  table.inv-table th:nth-child(7), table.inv-table td:nth-child(7){width:8%;}
+  table.inv-table th:nth-child(8), table.inv-table td:nth-child(8){width:13%;}
+  table.inv-table th:nth-child(9), table.inv-table td:nth-child(9){width:19%;}
+  table.inv-table td:nth-child(1), table.inv-table td:nth-child(3), table.inv-table td:nth-child(4),
+  table.inv-table td:nth-child(5), table.inv-table td:nth-child(6), table.inv-table td:nth-child(7),
+  table.inv-table td:nth-child(8){white-space:nowrap;}
+  table.inv-table thead th{
+    background:var(--surface-2);color:var(--muted);text-transform:uppercase;font-size:9px;letter-spacing:.02em;
+    text-align:left;padding:8px 8px;border-bottom:1px solid var(--border);white-space:normal;word-break:break-word;
+  }
+  table.inv-table tbody td{padding:6px 8px;border-bottom:1px solid var(--border-soft);white-space:normal;word-break:break-word;overflow-wrap:break-word;}
+  table.inv-table tbody tr:nth-child(even){background:var(--surface-2);}
+  table.inv-table .num{text-align:right;white-space:nowrap;}
+  .inv-dup{display:inline-block;margin-left:6px;font-size:9px;font-weight:700;color:var(--red);background:var(--red-dim);border-radius:999px;padding:1px 6px;text-transform:uppercase;}
+  .inv-totals{
+    margin:14px 26px 0;display:flex;justify-content:space-between;align-items:center;
+    background:var(--orange-dim);border:1px solid var(--orange-border);border-radius:10px;padding:12px 16px;
+  }
+  .inv-totals span{font-size:11.5px;color:var(--orange-text);}
+  .inv-total-value{font-size:16px;font-family:var(--font-mono);color:var(--orange-text);}
+  .inv-total-value strong{font-size:19px;}
+  .inv-pay{
+    margin:20px 26px 0;padding-top:16px;border-top:1px solid var(--border-soft);
+    display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;font-size:11.5px;color:var(--charcoal-light);
+  }
+  .inv-pay strong{color:var(--text);}
+  .inv-pay-note{max-width:340px;}
+  .inv-sign{margin:26px 26px 26px;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px;font-size:11.5px;color:var(--muted);}
+  .inv-sign-line{text-align:center;}
+  .inv-sign-line span{display:block;font-size:14px;color:var(--text);border-bottom:1px solid var(--border);padding-bottom:6px;min-width:220px;}
+  .inv-sign-line small{display:block;margin-top:4px;font-size:9.5px;text-transform:uppercase;letter-spacing:.03em;}
+
+  @media (max-width:820px){
+    .fatura-modal-body{grid-template-columns:1fr;max-height:calc(100vh - 120px);}
+    .fatura-form{border-right:none;border-bottom:1px solid var(--border);}
+  }
+
+  @media print{
+    body.printing-fatura > *:not(.fatura-modal-overlay){display:none !important;}
+    body.printing-fatura .fatura-modal-overlay{display:block !important;position:static;background:none;padding:0;inset:auto;}
+    body.printing-fatura .fatura-modal{box-shadow:none;width:auto;border-radius:0;}
+    body.printing-fatura .fatura-modal-head, body.printing-fatura .fatura-form{display:none !important;}
+    body.printing-fatura .fatura-modal-body{display:block;max-height:none;}
+    body.printing-fatura .fatura-preview-wrap{padding:0;background:#FFFFFF;overflow:visible;}
+    body.printing-fatura .inv-doc{border:none;box-shadow:none;border-radius:0;}
+  }
+
   footer{padding:26px clamp(16px,4vw,52px);color:var(--faint);font-size:11px;text-align:center;border-top:1px solid var(--border);}
 
   @media (max-width:600px){
@@ -478,6 +616,7 @@
     </div>
     <div class="header-meta">
       <span id="last-updated">Carregando dados…</span>
+      <button id="fatura-btn" type="button">Emitir fatura</button>
       <button id="refresh-btn" class="primary" type="button">Atualizar dados</button>
     </div>
   </div>
@@ -552,8 +691,94 @@
 
 </main>
 
+<div id="fatura-modal-overlay" class="fatura-modal-overlay">
+  <div class="fatura-modal" role="dialog" aria-modal="true" aria-label="Emitir fatura">
+    <div class="fatura-modal-head">
+      <h2>Emitir fatura</h2>
+      <button type="button" id="fatura-modal-close" class="fatura-modal-close" aria-label="Fechar">&times;</button>
+    </div>
+    <div class="fatura-modal-body">
+      <div class="fatura-form">
+        <div class="field">
+          <label>Cliente</label>
+          <select id="fatura-cliente-select"></select>
+        </div>
+        <div class="field">
+          <label>Pedido</label>
+          <select id="fatura-pedido-select"></select>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Período — de</label><input type="date" id="fatura-periodo-inicio"></div>
+          <div class="field"><label>até</label><input type="date" id="fatura-periodo-fim"></div>
+        </div>
+        <div class="field">
+          <label>Viagens a incluir</label>
+          <select id="fatura-situacao-select">
+            <option value="">Todas as situações</option>
+            <option value="apagar">Somente a pagar</option>
+            <option value="pago">Somente já pagas</option>
+          </select>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Fatura nº</label><input type="text" id="fatura-numero"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Emissão</label><input type="date" id="fatura-emissao"></div>
+          <div class="field"><label>Vencimento</label><input type="date" id="fatura-vencimento"></div>
+        </div>
+
+        <p class="fatura-form-subtitle">Dados do cliente na fatura</p>
+        <div class="field-row">
+          <div class="field"><label>CNPJ</label><input type="text" id="fatura-cnpj" placeholder="00.000.000/0000-00"></div>
+          <div class="field"><label>IE</label><input type="text" id="fatura-ie"></div>
+        </div>
+        <div class="field"><label>Endereço</label><input type="text" id="fatura-endereco"></div>
+        <div class="field-row">
+          <div class="field"><label>Cidade</label><input type="text" id="fatura-cidade"></div>
+          <div class="field field-sm"><label>UF</label><input type="text" id="fatura-estado" maxlength="2"></div>
+          <div class="field"><label>CEP</label><input type="text" id="fatura-cep"></div>
+        </div>
+
+        <button type="button" id="fatura-config-toggle" class="fatura-config-toggle">Dados da empresa / pagamento &#9881;</button>
+        <div id="fatura-config-panel" class="fatura-config-panel">
+          <div class="field"><label>Razão social</label><input type="text" data-cfg="empresaNome"></div>
+          <div class="field"><label>Endereço</label><input type="text" data-cfg="empresaEndereco"></div>
+          <div class="field"><label>Cidade/UF/CEP</label><input type="text" data-cfg="empresaCidadeUf"></div>
+          <div class="field-row">
+            <div class="field"><label>CNPJ</label><input type="text" data-cfg="empresaCnpj"></div>
+            <div class="field"><label>IE</label><input type="text" data-cfg="empresaIe"></div>
+          </div>
+          <div class="field"><label>Chave PIX</label><input type="text" data-cfg="pixChave"></div>
+          <div class="field-row">
+            <div class="field"><label>Banco</label><input type="text" data-cfg="banco"></div>
+            <div class="field"><label>Agência</label><input type="text" data-cfg="agencia"></div>
+            <div class="field"><label>Conta</label><input type="text" data-cfg="conta"></div>
+          </div>
+          <div class="field"><label>Responsável (assinatura)</label><input type="text" data-cfg="responsavelNome"></div>
+          <div class="field-row">
+            <div class="field"><label>Cidade de emissão</label><input type="text" data-cfg="cidadeEmissao"></div>
+            <div class="field"><label>Dias até vencimento (padrão)</label><input type="number" data-cfg="diasVencimento" min="0"></div>
+          </div>
+          <div class="field"><label>Texto de aviso</label><input type="text" data-cfg="avisoTexto"></div>
+          <div class="field"><label>E-mails de contato</label><input type="text" data-cfg="emailsContato"></div>
+        </div>
+
+        <div class="fatura-actions">
+          <button type="button" id="fatura-imprimir">Imprimir</button>
+          <button type="button" id="fatura-baixar-pdf" class="primary">Baixar PDF</button>
+        </div>
+      </div>
+
+      <div class="fatura-preview-wrap">
+        <div id="fatura-preview" class="inv-doc"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
 (function(){
 
@@ -1461,6 +1686,401 @@
     if(summaryEl) summaryEl.innerHTML = summaryHtml;
   }
 
+  /* ================= FATURA ================= */
+  var FATURA_CONFIG_KEY = 'integralFaturaConfig_v1';
+  var FATURA_CLIENTES_KEY = 'integralFaturaClientes_v1';
+  var FATURA_LOG_KEY = 'integralFaturaLog_v1';
+
+  function loadJSON(key, fallback){
+    try{
+      var raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    }catch(e){ return fallback; }
+  }
+  function saveJSON(key, val){
+    try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){}
+  }
+
+  function loadFaturaConfig(){
+    var def = {
+      proximoNumero: 1,
+      diasVencimento: 4,
+      empresaNome: 'INTEGRAL TRANSPORTES LTDA',
+      empresaEndereco: 'Rua Adoniran Barbosa, 110 – Messejana',
+      empresaCidadeUf: 'Fortaleza - CE, CEP: 60.831-725',
+      empresaCnpj: '05.975.134/0001-41',
+      empresaIe: '06.359.621-0',
+      pixChave: '05.975.134/0001-41',
+      banco: 'Itaú',
+      agencia: '0366',
+      conta: '20192-9',
+      responsavelNome: 'Antônio Hitalo Alves Soares',
+      cidadeEmissao: 'Fortaleza',
+      avisoTexto: 'Qualquer dúvida referente à cobrança, estamos à disposição. Aguardamos a efetivação do pagamento (PIX), sempre enviar o comprovante. Obrigado.',
+      emailsContato: 'logistica.pesados@integraltransp.com.br · financeiro@integraltransp.com.br'
+    };
+    var saved = loadJSON(FATURA_CONFIG_KEY, {});
+    for(var k in def){ if(saved[k] === undefined) saved[k] = def[k]; }
+    return saved;
+  }
+  function saveFaturaConfig(){ saveJSON(FATURA_CONFIG_KEY, faturaConfig); }
+
+  var faturaConfig = loadFaturaConfig();
+  var faturaClientes = loadJSON(FATURA_CLIENTES_KEY, {});
+  var faturaLog = loadJSON(FATURA_LOG_KEY, []);
+
+  function faturaClienteInfo(nome){
+    return faturaClientes[nome] || {cnpj:'', ie:'', endereco:'', cidade:'', estado:'', cep:''};
+  }
+  function saveFaturaClienteInfo(nome, info){
+    faturaClientes[nome] = info;
+    saveJSON(FATURA_CLIENTES_KEY, faturaClientes);
+  }
+
+  function allClientNames(){
+    var set = {};
+    state.pedidosView.forEach(function(p){ if(p.cliente && p.cliente !== '—') set[p.cliente] = true; });
+    state.entregas.forEach(function(r){ if(r.cliente) set[r.cliente] = true; });
+    return Object.keys(set).sort();
+  }
+  function pedidosDoCliente(cliente){
+    return state.pedidosView.filter(function(p){ return p.cliente === cliente; })
+      .sort(function(a,b){ var da=a.data?a.data.getTime():0, db=b.data?b.data.getTime():0; return db-da; });
+  }
+
+  function toISO(d){
+    if(!d) return '';
+    var dd=String(d.getDate()).padStart(2,'0'), mm=String(d.getMonth()+1).padStart(2,'0');
+    return d.getFullYear()+'-'+mm+'-'+dd;
+  }
+  function addDaysISO(iso, days){
+    var d = parseISODateInput(iso);
+    if(!d) return '';
+    d.setDate(d.getDate()+(parseInt(days,10)||0));
+    return toISO(d);
+  }
+  function fmtDateExtenso(iso){
+    var d = parseISODateInput(iso);
+    if(!d) return '';
+    return d.toLocaleDateString('pt-BR', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+  }
+  function fmtDateBR(iso){
+    var d = parseISODateInput(iso);
+    return d ? fmtDate(d) : '—';
+  }
+
+  function faturaViagemKey(r){ return (r.numero||'')+'|'+(r.nf||'')+'|'+(r.cte||''); }
+  function faturaAlreadyInvoiced(){
+    var set = {};
+    faturaLog.forEach(function(f){ (f.viagens||[]).forEach(function(k){ set[k]=f.numero; }); });
+    return set;
+  }
+
+  function openFaturaModal(){
+    var overlay = document.getElementById('fatura-modal-overlay');
+    overlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+
+    populateFaturaClienteSelect();
+    var pre = state.selectedPedidos.length ?
+      state.pedidosView.filter(function(p){ return p.numero === state.selectedPedidos[0]; })[0] : null;
+    var clienteSel = document.getElementById('fatura-cliente-select');
+    clienteSel.value = pre ? pre.cliente : (allClientNames()[0] || '');
+
+    populateFaturaPedidoSelect();
+    if(pre) document.getElementById('fatura-pedido-select').value = pre.numero;
+
+    document.getElementById('fatura-numero').value = faturaConfig.proximoNumero;
+    var hojeISO = toISO(new Date());
+    document.getElementById('fatura-emissao').value = hojeISO;
+    var vencEl = document.getElementById('fatura-vencimento');
+    vencEl.value = addDaysISO(hojeISO, faturaConfig.diasVencimento);
+    vencEl.dataset.touched = '';
+
+    onFaturaPedidoChange();
+    fillFaturaClienteFields();
+    renderFaturaPreview();
+  }
+  function closeFaturaModal(){
+    document.getElementById('fatura-modal-overlay').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  function populateFaturaClienteSelect(){
+    var sel = document.getElementById('fatura-cliente-select');
+    var names = allClientNames();
+    sel.innerHTML = names.map(function(n){ return '<option value="'+n.replace(/"/g,'&quot;')+'">'+n+'</option>'; }).join('');
+  }
+  function populateFaturaPedidoSelect(){
+    var sel = document.getElementById('fatura-pedido-select');
+    var cliente = document.getElementById('fatura-cliente-select').value;
+    var pedidos = pedidosDoCliente(cliente);
+    sel.innerHTML = '<option value="">Todos os pedidos deste cliente</option>' + pedidos.map(function(p){
+      return '<option value="'+p.numero+'">'+p.numero+(p.produto?' — '+p.produto:'')+'</option>';
+    }).join('');
+  }
+  function fillFaturaClienteFields(){
+    var cliente = document.getElementById('fatura-cliente-select').value;
+    var info = faturaClienteInfo(cliente);
+    document.getElementById('fatura-cnpj').value = info.cnpj || '';
+    document.getElementById('fatura-ie').value = info.ie || '';
+    document.getElementById('fatura-endereco').value = info.endereco || '';
+    document.getElementById('fatura-cidade').value = info.cidade || '';
+    document.getElementById('fatura-estado').value = info.estado || '';
+    document.getElementById('fatura-cep').value = info.cep || '';
+  }
+  function onFaturaPedidoChange(){
+    var cliente = document.getElementById('fatura-cliente-select').value;
+    var pedidoNum = document.getElementById('fatura-pedido-select').value;
+    var rows = state.entregas.filter(function(r){
+      return r.cliente === cliente && (!pedidoNum || r.numero === pedidoNum);
+    });
+    var dates = rows.map(function(r){ return r.data; }).filter(Boolean).sort(function(a,b){ return a-b; });
+    document.getElementById('fatura-periodo-inicio').value = dates.length ? toISO(dates[0]) : '';
+    document.getElementById('fatura-periodo-fim').value = dates.length ? toISO(dates[dates.length-1]) : '';
+  }
+
+  function faturaFilteredRows(){
+    var cliente = document.getElementById('fatura-cliente-select').value;
+    var pedidoNum = document.getElementById('fatura-pedido-select').value;
+    var situacao = document.getElementById('fatura-situacao-select').value;
+    var inicio = parseISODateInput(document.getElementById('fatura-periodo-inicio').value);
+    var fim = parseISODateInput(document.getElementById('fatura-periodo-fim').value);
+    if(fim) fim.setHours(23,59,59,999);
+    return state.entregas.filter(function(r){
+      if(r.cliente !== cliente) return false;
+      if(pedidoNum && r.numero !== pedidoNum) return false;
+      if(inicio && (!r.data || r.data.getTime() < inicio.getTime())) return false;
+      if(fim && (!r.data || r.data.getTime() > fim.getTime())) return false;
+      if(situacao === 'pago' && normKey(r.situacao) !== 'pago') return false;
+      if(situacao === 'apagar' && normKey(r.situacao) === 'pago') return false;
+      return true;
+    }).sort(function(a,b){
+      var da=a.data?a.data.getTime():0, db=b.data?b.data.getTime():0;
+      return da-db;
+    });
+  }
+
+  function renderFaturaPreview(){
+    var cliente = document.getElementById('fatura-cliente-select').value;
+    var pedidoNum = document.getElementById('fatura-pedido-select').value;
+    var numeroFatura = document.getElementById('fatura-numero').value || faturaConfig.proximoNumero;
+    var emissaoISO = document.getElementById('fatura-emissao').value;
+    var vencimentoISO = document.getElementById('fatura-vencimento').value;
+    var rows = faturaFilteredRows();
+    var alreadyInvoiced = faturaAlreadyInvoiced();
+
+    var pedidoInfo = pedidoNum ? state.pedidosView.filter(function(p){ return p.numero === pedidoNum; })[0] : null;
+    var pedidosEnvolvidos = pedidoNum ? [pedidoNum] : Array.from(new Set(rows.map(function(r){ return r.numero; }).filter(Boolean)));
+
+    var totalPeso = rows.reduce(function(s,r){ return s+r.pesoNF; }, 0);
+    var totalFrete = rows.reduce(function(s,r){ return s+r.freteTotal; }, 0);
+
+    var cnpj = document.getElementById('fatura-cnpj').value;
+    var ie = document.getElementById('fatura-ie').value;
+    var endereco = document.getElementById('fatura-endereco').value;
+    var cidade = document.getElementById('fatura-cidade').value;
+    var estado = document.getElementById('fatura-estado').value;
+    var cep = document.getElementById('fatura-cep').value;
+
+    var rowsHtml = rows.length ? rows.map(function(r){
+      var key = faturaViagemKey(r);
+      var dup = alreadyInvoiced[key];
+      return '<tr>' +
+        '<td>'+fmtDate(r.data)+'</td>' +
+        '<td>'+(r.motorista||'—')+'</td>' +
+        '<td>'+(r.placa||'—')+'</td>' +
+        '<td>'+(pedidoNum ? '' : (r.numero||'—')+' &middot; ')+(r.nf||'—')+'</td>' +
+        '<td>'+(r.cte||'—')+'</td>' +
+        '<td class="num">'+fmtNum(r.pesoNF,0)+'</td>' +
+        '<td class="num">'+fmtCurrency(r.valorKg)+'</td>' +
+        '<td class="num">'+fmtCurrency(r.freteTotal)+'</td>' +
+        '<td>'+(r.tipo||'—')+(dup ? ' <span class="inv-dup" title="Já incluído na Fatura '+dup+'">já faturado</span>' : '')+'</td>' +
+      '</tr>';
+    }).join('') : '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:18px;">Nenhuma viagem encontrada para este filtro.</td></tr>';
+
+    var volumeStrip = (pedidoInfo && pedidoInfo.contratado !== null && pedidoInfo.contratado !== undefined) ? (
+      '<div class="inv-strip">' +
+        '<div><span>Volume contratado</span><strong>'+fmtNum(pedidoInfo.contratado,0)+'</strong></div>' +
+        '<div><span>Entregue</span><strong>'+fmtNum(pedidoInfo.entregue,0)+'</strong></div>' +
+        '<div><span>Saldo a carregar</span><strong>'+fmtNum(pedidoInfo.falta,0)+'</strong></div>' +
+      '</div>'
+    ) : '';
+
+    var dupCount = rows.filter(function(r){ return alreadyInvoiced[faturaViagemKey(r)]; }).length;
+    var dupWarning = dupCount ? '<div class="inv-warning">'+dupCount+' viagem(ns) selecionada(s) já constam em fatura anterior — confira antes de emitir.</div>' : '';
+
+    var html =
+      '<div class="inv-topbar"></div>' +
+      '<div class="inv-head">' +
+        '<div class="inv-head-brand">' +
+          '<img src="data:image/png;base64,'+LOGO_B64+'" alt="">' +
+          '<div><strong>'+faturaConfig.empresaNome+'</strong>'+faturaConfig.empresaEndereco+'<br>'+faturaConfig.empresaCidadeUf+'<br>CNPJ '+faturaConfig.empresaCnpj+' &middot; IE '+faturaConfig.empresaIe+'</div>' +
+        '</div>' +
+        '<div class="inv-head-doc">' +
+          '<span class="inv-doc-eyebrow">Fatura</span>' +
+          '<span class="inv-doc-number">Nº '+numeroFatura+'</span>' +
+          '<div class="inv-doc-dates">' +
+            '<div><span>Pedido</span><strong>'+(pedidoNum || (pedidosEnvolvidos.join(', ')||'—'))+'</strong></div>' +
+            '<div><span>Emissão</span><strong>'+fmtDateBR(emissaoISO)+'</strong></div>' +
+            '<div><span>Vencimento</span><strong>'+fmtDateBR(vencimentoISO)+'</strong></div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="inv-client-card">' +
+        '<div><span>Cliente</span><strong>'+(cliente||'—')+'</strong></div>' +
+        '<div><span>CNPJ</span><strong>'+(cnpj||'—')+'</strong></div>' +
+        '<div><span>IE</span><strong>'+(ie||'—')+'</strong></div>' +
+        '<div class="wide"><span>Endereço</span><strong>'+(endereco||'—')+'</strong></div>' +
+        '<div><span>Cidade/UF</span><strong>'+(cidade||'—')+(estado?'/'+estado:'')+'</strong></div>' +
+        '<div><span>CEP</span><strong>'+(cep||'—')+'</strong></div>' +
+      '</div>' +
+      volumeStrip +
+      dupWarning +
+      '<div class="inv-table-wrap"><table class="inv-table"><thead><tr><th>Data</th><th>Motorista</th><th>Placa</th><th>NF</th><th>Ct-e</th><th class="num">Peso (kg)</th><th class="num">R$/kg</th><th class="num">Frete</th><th>Tipo</th></tr></thead><tbody>'+rowsHtml+'</tbody></table></div>' +
+      '<div class="inv-totals"><span>'+rows.length+' viagem(ns) &middot; '+fmtNum(totalPeso,0)+' kg</span><div class="inv-total-value">Total <strong>'+fmtCurrency(totalFrete)+'</strong></div></div>' +
+      '<div class="inv-pay">' +
+        '<div><strong>Transferência bancária / PIX</strong><br>Chave PIX: '+faturaConfig.pixChave+'<br>Banco: '+faturaConfig.banco+' &middot; Agência: '+faturaConfig.agencia+' &middot; Conta: '+faturaConfig.conta+'</div>' +
+        '<div class="inv-pay-note">'+faturaConfig.avisoTexto+'<br>'+faturaConfig.emailsContato+'</div>' +
+      '</div>' +
+      '<div class="inv-sign">' +
+        '<div>'+faturaConfig.cidadeEmissao+', '+fmtDateExtenso(emissaoISO)+'</div>' +
+        '<div class="inv-sign-line"><span>'+faturaConfig.responsavelNome+'</span><small>Assinatura do responsável</small></div>' +
+      '</div>';
+
+    document.getElementById('fatura-preview').innerHTML = html;
+  }
+
+  function persistFaturaClienteAtual(){
+    var cliente = document.getElementById('fatura-cliente-select').value;
+    if(!cliente) return;
+    saveFaturaClienteInfo(cliente, {
+      cnpj: document.getElementById('fatura-cnpj').value,
+      ie: document.getElementById('fatura-ie').value,
+      endereco: document.getElementById('fatura-endereco').value,
+      cidade: document.getElementById('fatura-cidade').value,
+      estado: document.getElementById('fatura-estado').value,
+      cep: document.getElementById('fatura-cep').value
+    });
+  }
+
+  function registrarFaturaEmitida(){
+    var rows = faturaFilteredRows();
+    var numero = document.getElementById('fatura-numero').value;
+    faturaLog.push({
+      numero: numero,
+      cliente: document.getElementById('fatura-cliente-select').value,
+      pedido: document.getElementById('fatura-pedido-select').value || '(vários)',
+      dataEmissao: document.getElementById('fatura-emissao').value,
+      total: rows.reduce(function(s,r){ return s+r.freteTotal; }, 0),
+      viagens: rows.map(faturaViagemKey)
+    });
+    saveJSON(FATURA_LOG_KEY, faturaLog);
+    var n = parseInt(numero,10);
+    if(!isNaN(n) && n >= faturaConfig.proximoNumero){
+      faturaConfig.proximoNumero = n+1;
+      saveFaturaConfig();
+    }
+  }
+
+  function gerarFaturaPdf(){
+    var rows = faturaFilteredRows();
+    if(!rows.length){
+      alert('Nenhuma viagem encontrada para esse filtro. Ajuste o pedido/período antes de gerar a fatura.');
+      return;
+    }
+    if(typeof html2pdf === 'undefined'){
+      alert('Não foi possível carregar o gerador de PDF (sem conexão?). Use "Imprimir" e salve como PDF.');
+      return;
+    }
+    persistFaturaClienteAtual();
+    var numero = document.getElementById('fatura-numero').value;
+    var cliente = document.getElementById('fatura-cliente-select').value;
+    var el = document.getElementById('fatura-preview');
+    var btn = document.getElementById('fatura-baixar-pdf');
+    btn.disabled = true; btn.textContent = 'Gerando…';
+    var filename = 'Fatura_'+numero+'_'+(cliente||'cliente').replace(/[^a-zA-Z0-9]+/g,'_')+'.pdf';
+    html2pdf().set({
+      margin: 8,
+      filename: filename,
+      image: { type:'jpeg', quality:0.98 },
+      html2canvas: { scale:2, useCORS:true },
+      jsPDF: { unit:'mm', format:'a4', orientation:'portrait' },
+      pagebreak: { mode:['avoid-all','css','legacy'] }
+    }).from(el).save().then(function(){
+      registrarFaturaEmitida();
+      document.getElementById('fatura-numero').value = faturaConfig.proximoNumero;
+      renderFaturaPreview();
+      btn.disabled = false; btn.textContent = 'Baixar PDF';
+    }).catch(function(){
+      btn.disabled = false; btn.textContent = 'Baixar PDF';
+      alert('Falha ao gerar o PDF. Tente novamente ou use "Imprimir".');
+    });
+  }
+
+  function imprimirFatura(){
+    var rows = faturaFilteredRows();
+    if(!rows.length){
+      alert('Nenhuma viagem encontrada para esse filtro. Ajuste o pedido/período antes de imprimir.');
+      return;
+    }
+    persistFaturaClienteAtual();
+    document.body.classList.add('printing-fatura');
+    window.print();
+    setTimeout(function(){
+      document.body.classList.remove('printing-fatura');
+      registrarFaturaEmitida();
+      document.getElementById('fatura-numero').value = faturaConfig.proximoNumero;
+      renderFaturaPreview();
+    }, 300);
+  }
+
+  function wireFaturaModal(){
+    document.getElementById('fatura-btn').addEventListener('click', openFaturaModal);
+    document.getElementById('fatura-modal-close').addEventListener('click', closeFaturaModal);
+    document.getElementById('fatura-modal-overlay').addEventListener('click', function(ev){
+      if(ev.target.id === 'fatura-modal-overlay') closeFaturaModal();
+    });
+    document.getElementById('fatura-cliente-select').addEventListener('change', function(){
+      populateFaturaPedidoSelect();
+      onFaturaPedidoChange();
+      fillFaturaClienteFields();
+      renderFaturaPreview();
+    });
+    document.getElementById('fatura-pedido-select').addEventListener('change', function(){
+      onFaturaPedidoChange();
+      renderFaturaPreview();
+    });
+    ['fatura-situacao-select','fatura-periodo-inicio','fatura-periodo-fim','fatura-numero',
+     'fatura-cnpj','fatura-ie','fatura-endereco','fatura-cidade','fatura-estado','fatura-cep'].forEach(function(id){
+      var el = document.getElementById(id);
+      el.addEventListener('input', renderFaturaPreview);
+      el.addEventListener('change', renderFaturaPreview);
+    });
+    document.getElementById('fatura-emissao').addEventListener('change', function(){
+      var v = document.getElementById('fatura-vencimento');
+      if(!v.dataset.touched){
+        v.value = addDaysISO(document.getElementById('fatura-emissao').value, faturaConfig.diasVencimento);
+      }
+      renderFaturaPreview();
+    });
+    document.getElementById('fatura-vencimento').addEventListener('input', function(){ this.dataset.touched = '1'; renderFaturaPreview(); });
+
+    document.getElementById('fatura-baixar-pdf').addEventListener('click', gerarFaturaPdf);
+    document.getElementById('fatura-imprimir').addEventListener('click', imprimirFatura);
+    document.getElementById('fatura-config-toggle').addEventListener('click', function(){
+      document.getElementById('fatura-config-panel').classList.toggle('open');
+    });
+    document.querySelectorAll('#fatura-config-panel [data-cfg]').forEach(function(inp){
+      inp.value = faturaConfig[inp.getAttribute('data-cfg')];
+      inp.addEventListener('input', function(){
+        faturaConfig[inp.getAttribute('data-cfg')] = inp.value;
+        saveFaturaConfig();
+        renderFaturaPreview();
+      });
+    });
+  }
+
   function render(){
     renderClientRow();
     renderStatusFilterRow();
@@ -1477,6 +2097,8 @@
   syncHeaderHeight();
 
   document.getElementById('refresh-btn').addEventListener('click', loadData);
+
+  wireFaturaModal();
 
   document.getElementById('expand-detail-btn').addEventListener('click', function(){
     var scrollBottom = document.querySelector('.scroll-bottom');
