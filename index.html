@@ -287,6 +287,16 @@
     min-height:280px;
   }
   .pedido-summary-panel .detail-empty{padding:50px 10px;}
+  .general-summary-title{font-size:15px;font-weight:700;color:var(--text);margin:0 0 14px;}
+  .general-summary .detail-stats{margin-bottom:14px;}
+  .general-summary-projection{
+    background:var(--orange-dim);border:1px solid var(--orange-border);border-radius:var(--radius);
+    padding:12px 16px;font-size:12.5px;color:var(--orange-text);margin-bottom:16px;line-height:1.5;
+  }
+  .general-summary-projection strong{font-size:13.5px;}
+  .general-summary-table-wrap table{min-width:0;font-size:12px;}
+  .general-summary-table-wrap thead th{padding:8px 10px;font-size:10px;}
+  .general-summary-table-wrap tbody td{padding:8px 10px;white-space:nowrap;}
   @media (max-width:900px){
     .top-split{grid-template-columns:1fr;}
     .top-split-right{position:static;}
@@ -553,23 +563,25 @@
   table.inv-table.inv-interactive th.col-check, table.inv-table.inv-interactive td.col-check{width:26px;}
   table.inv-table.inv-interactive th.col-check input, table.inv-table.inv-interactive td.col-check input{width:13px;height:13px;}
   table.inv-table.inv-interactive th.col-data, table.inv-table.inv-interactive td.col-data{width:9%;}
-  table.inv-table.inv-interactive th.col-mot, table.inv-table.inv-interactive td.col-mot{width:18%;}
+  table.inv-table.inv-interactive th.col-mot, table.inv-table.inv-interactive td.col-mot{width:16%;}
   table.inv-table.inv-interactive th.col-placa, table.inv-table.inv-interactive td.col-placa{width:7%;}
+  table.inv-table.inv-interactive th.col-pedido, table.inv-table.inv-interactive td.col-pedido{width:8%;}
   table.inv-table.inv-interactive th.col-doc, table.inv-table.inv-interactive td.col-doc{width:9%;}
   table.inv-table.inv-interactive th.col-cte, table.inv-table.inv-interactive td.col-cte{width:6%;}
   table.inv-table.inv-interactive th.col-peso, table.inv-table.inv-interactive td.col-peso{width:8%;}
   table.inv-table.inv-interactive th.col-preco, table.inv-table.inv-interactive td.col-preco{width:7%;}
   table.inv-table.inv-interactive th.col-frete, table.inv-table.inv-interactive td.col-frete{width:11%;}
-  table.inv-table.inv-interactive th.col-tipo, table.inv-table.inv-interactive td.col-tipo{width:12%;}
+  table.inv-table.inv-interactive th.col-tipo, table.inv-table.inv-interactive td.col-tipo{width:10%;}
   table.inv-table.inv-export th.col-data, table.inv-table.inv-export td.col-data{width:9%;}
-  table.inv-table.inv-export th.col-mot, table.inv-table.inv-export td.col-mot{width:21%;}
+  table.inv-table.inv-export th.col-mot, table.inv-table.inv-export td.col-mot{width:18%;}
   table.inv-table.inv-export th.col-placa, table.inv-table.inv-export td.col-placa{width:7%;}
-  table.inv-table.inv-export th.col-doc, table.inv-table.inv-export td.col-doc{width:12%;}
+  table.inv-table.inv-export th.col-pedido, table.inv-table.inv-export td.col-pedido{width:9%;}
+  table.inv-table.inv-export th.col-doc, table.inv-table.inv-export td.col-doc{width:8%;}
   table.inv-table.inv-export th.col-cte, table.inv-table.inv-export td.col-cte{width:6%;}
   table.inv-table.inv-export th.col-peso, table.inv-table.inv-export td.col-peso{width:8%;}
   table.inv-table.inv-export th.col-preco, table.inv-table.inv-export td.col-preco{width:7%;}
   table.inv-table.inv-export th.col-frete, table.inv-table.inv-export td.col-frete{width:12%;}
-  table.inv-table.inv-export th.col-tipo, table.inv-table.inv-export td.col-tipo{width:18%;}
+  table.inv-table.inv-export th.col-tipo, table.inv-table.inv-export td.col-tipo{width:16%;}
   table.inv-table td:not(.col-check){white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   table.inv-table thead th{
     background:var(--surface-2);color:var(--muted);text-transform:uppercase;font-size:6.5px;letter-spacing:.01em;
@@ -1350,7 +1362,7 @@
     var hint = document.getElementById('detail-hint');
 
     if(!state.selectedPedidos.length){
-      summaryPanel.innerHTML = '<div class="detail-empty">Selecione um pedido ao lado para ver o resumo e o gráfico.</div>';
+      summaryPanel.innerHTML = buildGeneralSummaryHtml();
       tablePanel.innerHTML = '<div class="detail-empty">Selecione um ou mais pedidos acima para ver as viagens realizadas.</div>';
       hint.textContent = '';
       Object.keys(state.detailCharts).forEach(function(k){ state.detailCharts[k].destroy(); });
@@ -1372,6 +1384,75 @@
     tablePanel.innerHTML = selectedList.map(function(p){ return buildTableHtml(p); }).join('');
 
     selectedList.forEach(function(p){ wireDetailBlock(p); });
+  }
+
+  function buildGeneralSummaryHtml(){
+    var list = state.pedidosView.filter(function(p){ return p.status === 'andamento'; });
+    if(!list.length){
+      return '<div class="detail-empty">Nenhum pedido em atendimento no momento.<br>Selecione um pedido ao lado para ver o resumo e o gráfico.</div>';
+    }
+
+    var totalFaltaTon = 0, totalViagensPendentes = 0;
+    var latestEstDate = null, semProjecao = 0;
+
+    var rows = list.map(function(p){
+      totalFaltaTon += toTon(p.falta);
+      totalViagensPendentes += p.viagensPendentes;
+
+      var ownRows = state.entregas.filter(function(r){ return r.numero === p.numero && r.data; });
+      var estDate = null;
+      if(ownRows.length){
+        var activeDaySet = {};
+        ownRows.forEach(function(r){
+          var k = r.data.getFullYear()+'-'+r.data.getMonth()+'-'+r.data.getDate();
+          activeDaySet[k] = true;
+        });
+        var activeDays = Math.max(1, Object.keys(activeDaySet).length);
+        var totalTon = ownRows.reduce(function(s,r){ return s + toTon(r.pesoNF); }, 0);
+        var avgPerDay = totalTon / activeDays;
+        var remainingTon = toTon(p.falta);
+        if(avgPerDay > 0 && remainingTon > 0){
+          var lastDt = ownRows.reduce(function(m,r){ return (!m || r.data.getTime() > m.getTime()) ? r.data : m; }, null);
+          var daysToFinish = Math.ceil(remainingTon / avgPerDay);
+          estDate = new Date(lastDt.getTime() + daysToFinish*86400000);
+        }
+      }
+      if(estDate){
+        if(!latestEstDate || estDate.getTime() > latestEstDate.getTime()) latestEstDate = estDate;
+      } else {
+        semProjecao++;
+      }
+      return {p:p, estDate:estDate};
+    });
+
+    var previsaoHtml = latestEstDate ?
+      'Previsão de conclusão de todos os pedidos em atendimento, no ritmo atual de cada um: <strong>'+fmtDate(latestEstDate)+'</strong>' +
+      (semProjecao ? ' <span style="color:var(--charcoal-light);font-weight:400;">('+semProjecao+' pedido(s) sem dados suficientes para projetar)</span>' : '') :
+      'Não foi possível calcular uma previsão de conclusão com os dados disponíveis.';
+
+    var listHtml = rows.map(function(x){
+      var p = x.p;
+      return '<tr>' +
+        '<td>'+p.numero+'</td>' +
+        '<td>'+(p.cliente||'—')+'</td>' +
+        '<td class="num">'+fmtNum(toTon(p.falta),1)+' ton</td>' +
+        '<td class="num">'+p.viagensPendentes+'</td>' +
+        '<td>'+(x.estDate ? fmtDate(x.estDate) : '—')+'</td>' +
+      '</tr>';
+    }).join('');
+
+    return (
+      '<div class="general-summary">' +
+        '<p class="general-summary-title">Resumo geral — pedidos em atendimento</p>' +
+        '<div class="detail-stats">' +
+          '<div><p class="stat-label">Pedidos em atendimento</p><p class="stat-value">'+list.length+'</p></div>' +
+          '<div><p class="stat-label">Total faltante</p><p class="stat-value" style="color:var(--red)">'+fmtNum(totalFaltaTon,1)+' ton</p></div>' +
+          '<div><p class="stat-label">Viagens faltantes</p><p class="stat-value" style="color:var(--red)">'+totalViagensPendentes+'</p></div>' +
+        '</div>' +
+        '<div class="general-summary-projection">'+previsaoHtml+'</div>' +
+        '<div class="general-summary-table-wrap table-wrap"><table><thead><tr><th>Pedido</th><th>Cliente</th><th class="num">Falta</th><th class="num">Viagens</th><th>Previsão</th></tr></thead><tbody>'+listHtml+'</tbody></table></div>' +
+      '</div>'
+    );
   }
 
   function buildSummaryHtml(p){
@@ -1968,20 +2049,20 @@
     var estado = document.getElementById('fatura-estado').value;
     var cep = document.getElementById('fatura-cep').value;
 
-    var colCount = forExport ? 9 : 10;
+    var colCount = forExport ? 10 : 11;
     var allIncluded = allRows.length > 0 && allRows.every(faturaIsIncluded);
     var checkTh = forExport ? '' : '<th class="col-check"><input type="checkbox" id="fatura-check-all" title="Selecionar/desmarcar todas"'+(allIncluded?' checked':'')+'></th>';
     var rowsHtml = rows.length ? rows.map(function(r){
       var key = faturaViagemKey(r);
       var included = faturaIsIncluded(r);
       var checkTd = forExport ? '' : '<td class="col-check"><input type="checkbox" class="fatura-row-check" data-key="'+key.replace(/"/g,'&quot;')+'"'+(included?' checked':'')+'></td>';
-      var docLabel = (pedidoNum ? '' : (r.numero||'—')+' &middot; ')+(r.nf||'—');
       return '<tr'+(!forExport && !included ? ' class="excluded"' : '')+'>' +
         checkTd +
         '<td class="col-data">'+fmtDate(r.data)+'</td>' +
         '<td class="col-mot" title="'+(r.motorista||'').replace(/"/g,'&quot;')+'">'+(r.motorista||'—')+'</td>' +
         '<td class="col-placa">'+(r.placa||'—')+'</td>' +
-        '<td class="col-doc" title="'+docLabel.replace(/"/g,'&quot;')+'">'+docLabel+'</td>' +
+        '<td class="col-pedido">'+(r.numero||'—')+'</td>' +
+        '<td class="col-doc">'+(r.nf||'—')+'</td>' +
         '<td class="col-cte">'+(r.cte||'—')+'</td>' +
         '<td class="num col-peso">'+fmtNum(r.pesoNF,0)+'</td>' +
         '<td class="num col-preco">'+fmtCurrency(r.valorKg)+'</td>' +
@@ -2027,7 +2108,7 @@
       '</div>' +
       volumeStrip +
       selectionNote +
-      '<div class="inv-table-wrap"><table class="inv-table '+(forExport?'inv-export':'inv-interactive')+'"><thead><tr>'+checkTh+'<th class="col-data">Data</th><th class="col-mot">Motorista</th><th class="col-placa">Placa</th><th class="col-doc">NF</th><th class="col-cte">Ct-e</th><th class="num col-peso">Peso (kg)</th><th class="num col-preco">R$/kg</th><th class="num col-frete">Frete</th><th class="col-tipo">Tipo</th></tr></thead><tbody>'+rowsHtml+'</tbody></table></div>' +
+      '<div class="inv-table-wrap"><table class="inv-table '+(forExport?'inv-export':'inv-interactive')+'"><thead><tr>'+checkTh+'<th class="col-data">Data</th><th class="col-mot">Motorista</th><th class="col-placa">Placa</th><th class="col-pedido">Pedido</th><th class="col-doc">NF</th><th class="col-cte">Ct-e</th><th class="num col-peso">Peso (kg)</th><th class="num col-preco">R$/kg</th><th class="num col-frete">Frete</th><th class="col-tipo">Tipo</th></tr></thead><tbody>'+rowsHtml+'</tbody></table></div>' +
       '<div class="inv-totals"><span>'+totalsBase.length+' viagem(ns) &middot; '+fmtNum(totalPeso,0)+' kg</span><div class="inv-total-value">Total <strong>'+fmtCurrency(totalFrete)+'</strong></div></div>' +
       '<div class="inv-pay">' +
         '<div><strong>Transferência bancária / PIX</strong><br>Chave PIX: '+faturaConfig.pixChave+'<br>Banco: '+faturaConfig.banco+' &middot; Agência: '+faturaConfig.agencia+' &middot; Conta: '+faturaConfig.conta+'</div>' +
