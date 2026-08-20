@@ -496,9 +496,10 @@
   .field-row .field{flex:1;}
   .field-sm{flex:0 0 60px;}
   .fatura-form-subtitle{margin:10px 0 -2px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding-top:10px;border-top:1px solid var(--border-soft);}
-  .fatura-cliente-source{margin:2px 0 0;font-size:10.5px;}
-  .fatura-cliente-source.ok{color:var(--green);}
-  .fatura-cliente-source.warn{color:var(--red);}
+  .fatura-cliente-source{margin:2px 0 0;font-size:10.5px;padding:6px 8px;border-radius:7px;}
+  .fatura-cliente-source.ok{display:none;}
+  .fatura-cliente-source.warn{color:var(--red);background:var(--red-dim);border:1px solid var(--red);}
+  .fatura-cliente-source:empty{display:none;}
   .fatura-config-toggle{margin-top:6px;width:100%;text-align:left;font-size:11.5px;}
   .fatura-config-panel{max-height:0;overflow:hidden;transition:max-height .2s ease;display:flex;flex-direction:column;gap:10px;}
   .fatura-config-panel.open{max-height:900px;padding-top:10px;}
@@ -540,6 +541,11 @@
   }
   .inv-selection-note{margin:0 16px 5px;font-size:9px;color:var(--muted);}
   .inv-table-wrap{margin:0 16px 0;border:1px solid var(--border-soft);border-radius:8px;overflow:hidden;}
+  .inv-table-wrap.inv-table-scroll{max-height:48vh;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:var(--orange) var(--surface-2);}
+  .inv-table-wrap.inv-table-scroll::-webkit-scrollbar{width:9px;}
+  .inv-table-wrap.inv-table-scroll::-webkit-scrollbar-track{background:var(--surface-2);}
+  .inv-table-wrap.inv-table-scroll::-webkit-scrollbar-thumb{background:var(--orange);border-radius:9px;}
+  .inv-table-wrap.inv-table-scroll thead th{position:sticky;top:0;z-index:1;}
   table.inv-table{width:100%;min-width:0;border-collapse:collapse;table-layout:fixed;font-family:var(--font-mono);font-size:7.3px;}
   table.inv-table th.col-check, table.inv-table td.col-check{width:16px;text-align:center;padding:1px 0 1px 3px;}
   table.inv-table th.col-check input, table.inv-table td.col-check input{width:9px;height:9px;margin:0;vertical-align:middle;}
@@ -743,18 +749,13 @@
           <div class="field"><label>Vencimento</label><input type="date" id="fatura-vencimento"></div>
         </div>
 
-        <p class="fatura-form-subtitle">Dados do cliente na fatura</p>
         <p id="fatura-cliente-source" class="fatura-cliente-source"></p>
-        <div class="field-row">
-          <div class="field"><label>CNPJ</label><input type="text" id="fatura-cnpj" placeholder="00.000.000/0000-00"></div>
-          <div class="field"><label>IE</label><input type="text" id="fatura-ie"></div>
-        </div>
-        <div class="field"><label>Endereço</label><input type="text" id="fatura-endereco"></div>
-        <div class="field-row">
-          <div class="field"><label>Cidade</label><input type="text" id="fatura-cidade"></div>
-          <div class="field field-sm"><label>UF</label><input type="text" id="fatura-estado" maxlength="2"></div>
-          <div class="field"><label>CEP</label><input type="text" id="fatura-cep"></div>
-        </div>
+        <input type="hidden" id="fatura-cnpj">
+        <input type="hidden" id="fatura-ie">
+        <input type="hidden" id="fatura-endereco">
+        <input type="hidden" id="fatura-cidade">
+        <input type="hidden" id="fatura-estado">
+        <input type="hidden" id="fatura-cep">
 
         <button type="button" id="fatura-config-toggle" class="fatura-config-toggle">Dados da empresa / pagamento &#9881;</button>
         <div id="fatura-config-panel" class="fatura-config-panel">
@@ -2025,7 +2026,7 @@
       volumeStrip +
       dupWarning +
       selectionNote +
-      '<div class="inv-table-wrap"><table class="inv-table '+(forExport?'inv-export':'inv-interactive')+'"><thead><tr>'+checkTh+'<th class="col-data">Data</th><th class="col-mot">Motorista</th><th class="col-placa">Placa</th><th class="col-doc">NF</th><th class="col-cte">Ct-e</th><th class="num col-peso">Peso (kg)</th><th class="num col-preco">R$/kg</th><th class="num col-frete">Frete</th><th class="col-tipo">Tipo</th></tr></thead><tbody>'+rowsHtml+'</tbody></table></div>' +
+      '<div class="inv-table-wrap'+(forExport?'':' inv-table-scroll')+'"><table class="inv-table '+(forExport?'inv-export':'inv-interactive')+'"><thead><tr>'+checkTh+'<th class="col-data">Data</th><th class="col-mot">Motorista</th><th class="col-placa">Placa</th><th class="col-doc">NF</th><th class="col-cte">Ct-e</th><th class="num col-peso">Peso (kg)</th><th class="num col-preco">R$/kg</th><th class="num col-frete">Frete</th><th class="col-tipo">Tipo</th></tr></thead><tbody>'+rowsHtml+'</tbody></table></div>' +
       '<div class="inv-totals"><span>'+totalsBase.length+' viagem(ns) &middot; '+fmtNum(totalPeso,0)+' kg</span><div class="inv-total-value">Total <strong>'+fmtCurrency(totalFrete)+'</strong></div></div>' +
       '<div class="inv-pay">' +
         '<div><strong>Transferência bancária / PIX</strong><br>Chave PIX: '+faturaConfig.pixChave+'<br>Banco: '+faturaConfig.banco+' &middot; Agência: '+faturaConfig.agencia+' &middot; Conta: '+faturaConfig.conta+'</div>' +
