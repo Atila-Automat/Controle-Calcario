@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Integral Transportes — Controle de Carregamento</title>
+<title>Acompanhamento Calcário / Brica — Integral Transportes</title>
 <link rel="icon" id="favicon-link" href="">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -650,7 +650,7 @@
       <img id="logo-img" src="" alt="Integral Transportes">
       <div class="brand-text">
         <p class="eyebrow">Integral Transportes</p>
-        <h1>Acompanhamento calcário</h1>
+        <h1>Acompanhamento calcário / brica</h1>
       </div>
     </div>
     <div class="header-meta">
@@ -1400,7 +1400,7 @@
       totalViagensPendentes += p.viagensPendentes;
 
       var ownRows = state.entregas.filter(function(r){ return r.numero === p.numero && r.data; });
-      var estDate = null;
+      var estDate = null, avgTonDia = null, avgViagensDia = null;
       if(ownRows.length){
         var activeDaySet = {};
         ownRows.forEach(function(r){
@@ -1410,6 +1410,8 @@
         var activeDays = Math.max(1, Object.keys(activeDaySet).length);
         var totalTon = ownRows.reduce(function(s,r){ return s + toTon(r.pesoNF); }, 0);
         var avgPerDay = totalTon / activeDays;
+        avgTonDia = avgPerDay;
+        avgViagensDia = ownRows.length / activeDays;
         var remainingTon = toTon(p.falta);
         if(avgPerDay > 0 && remainingTon > 0){
           var lastDt = ownRows.reduce(function(m,r){ return (!m || r.data.getTime() > m.getTime()) ? r.data : m; }, null);
@@ -1422,7 +1424,7 @@
       } else {
         semProjecao++;
       }
-      return {p:p, estDate:estDate};
+      return {p:p, estDate:estDate, avgTonDia:avgTonDia, avgViagensDia:avgViagensDia};
     });
 
     var previsaoHtml = latestEstDate ?
@@ -1435,8 +1437,11 @@
       return '<tr>' +
         '<td>'+p.numero+'</td>' +
         '<td>'+(p.cliente||'—')+'</td>' +
+        '<td>'+(p.produto||'—')+'</td>' +
         '<td class="num">'+fmtNum(toTon(p.falta),1)+' ton</td>' +
         '<td class="num">'+p.viagensPendentes+'</td>' +
+        '<td class="num">'+(x.avgTonDia !== null ? fmtNum(x.avgTonDia,1)+' ton/dia' : '—')+'</td>' +
+        '<td class="num">'+(x.avgViagensDia !== null ? fmtNum(x.avgViagensDia,1)+' viagem/dia' : '—')+'</td>' +
         '<td>'+(x.estDate ? fmtDate(x.estDate) : '—')+'</td>' +
       '</tr>';
     }).join('');
@@ -1450,7 +1455,7 @@
           '<div><p class="stat-label">Viagens faltantes</p><p class="stat-value" style="color:var(--red)">'+totalViagensPendentes+'</p></div>' +
         '</div>' +
         '<div class="general-summary-projection">'+previsaoHtml+'</div>' +
-        '<div class="general-summary-table-wrap table-wrap"><table><thead><tr><th>Pedido</th><th>Cliente</th><th class="num">Falta</th><th class="num">Viagens</th><th>Previsão</th></tr></thead><tbody>'+listHtml+'</tbody></table></div>' +
+        '<div class="general-summary-table-wrap table-wrap"><table><thead><tr><th>Pedido</th><th>Cliente</th><th>Produto</th><th class="num">Falta</th><th class="num">Viagens</th><th class="num">Média ton/dia</th><th class="num">Média viagem/dia</th><th>Previsão</th></tr></thead><tbody>'+listHtml+'</tbody></table></div>' +
       '</div>'
     );
   }
