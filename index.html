@@ -29,12 +29,12 @@
     --green-border:#86EFAC;
     --red:#DC2626;
     --red-dim:#FEF2F2;
-    --indigo:#4F46E5;
-    --indigo-dark:#4338CA;
-    --indigo-text:#4338CA;
-    --indigo-dim:#EEF2FF;
-    --indigo-border:#C7D2FE;
-    --shadow-button-indigo:0 4px 12px rgba(79,70,229,0.28);
+    --indigo:var(--orange);
+    --indigo-dark:var(--orange-dark);
+    --indigo-text:var(--orange-text);
+    --indigo-dim:var(--orange-dim);
+    --indigo-border:var(--orange-border);
+    --shadow-button-indigo:var(--shadow-button);
     --text:#111827;
     --muted:#6B7280;
     --faint:#9CA3AF;
@@ -679,7 +679,7 @@
   }
   .indicadores-overlay.open{display:block;}
   .indicadores-panel{
-    position:fixed;top:0;right:0;bottom:0;width:min(760px,94vw);
+    position:fixed;top:0;right:0;bottom:0;width:min(94vw, clamp(760px, 62vw, 1200px));
     background:var(--surface);box-shadow:-16px 0 44px rgba(15,23,42,0.25);
     display:flex;flex-direction:column;
     transform:translateX(100%);transition:transform .28s cubic-bezier(.32,.72,0,1);
@@ -700,6 +700,16 @@
   .indicadores-body::-webkit-scrollbar{width:9px;}
   .indicadores-body::-webkit-scrollbar-track{background:var(--surface-2);}
   .indicadores-body::-webkit-scrollbar-thumb{background:var(--indigo);border-radius:9px;}
+  .indicadores-filtro{
+    position:sticky;top:-22px;z-index:5;
+    margin:-22px -24px 22px;padding:16px 24px;
+    background:var(--surface);border-bottom:1px solid var(--border);
+    display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;
+  }
+  .indicadores-filtro .field{flex:0 0 150px;}
+  .indicadores-filtro-actions{display:flex;gap:8px;}
+  .indicadores-filtro-actions button{padding:8px 14px;font-size:11.5px;}
+  .indicadores-filtro-info{margin:0 0 0 auto;align-self:center;font-size:11px;color:var(--charcoal-light);text-align:right;max-width:220px;}
   .indicadores-kpis{margin:0 0 26px;}
   .indicadores-section{margin-bottom:30px;}
   .indicadores-section:last-child{margin-bottom:4px;}
@@ -722,6 +732,12 @@
   }
   .indicadores-chart-card canvas{max-height:260px;}
   .indicadores-empty{font-size:12.5px;color:var(--charcoal-light);padding:14px 0;}
+  .indicadores-toggle{display:inline-flex;border:1px solid var(--border);border-radius:999px;overflow:hidden;background:var(--surface);margin-bottom:14px;}
+  .indicadores-toggle button{
+    font-family:var(--font-display);font-weight:600;font-size:11.5px;
+    padding:6px 14px;border:none;border-radius:0;background:transparent;color:var(--muted);cursor:pointer;
+  }
+  .indicadores-toggle button.active{background:var(--indigo);color:#FFFFFF;}
 
   footer{padding:26px clamp(16px,4vw,52px);color:var(--faint);font-size:11px;text-align:center;border-top:1px solid var(--border);}
 
@@ -975,7 +991,9 @@
     chartProjectionByPedido:{},
     detailCharts:{},
     senhaCallback:null,
-    indicadoresCharts:{}
+    indicadoresCharts:{},
+    indicadoresPeriodo:{inicio:'', fim:''},
+    indicadoresStatusPedidos:'finalizado'
   };
 
   function getTipos(numero){ return state.selectedTiposByPedido[numero] || (state.selectedTiposByPedido[numero] = []); }
@@ -2402,9 +2420,31 @@
 
   var MESES_ABBR = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 
-  function computeVeiculoMotoristaRanks(){
+  function getIndicadoresFiltro(){
+    return state.indicadoresPeriodo || (state.indicadoresPeriodo = {inicio:'', fim:''});
+  }
+
+  // Retorna as entregas dentro do período escolhido no filtro do painel de
+  // Indicadores. Sem filtro definido, retorna todas as entregas (comportamento
+  // igual ao de antes do filtro existir). Com filtro, exige que a entrega
+  // tenha data (linhas sem data não entram quando um período é aplicado).
+  function filteredEntregasForIndicadores(){
+    var f = getIndicadoresFiltro();
+    var inicio = parseISODateInput(f.inicio);
+    var fim = parseISODateInput(f.fim);
+    if(!inicio && !fim) return state.entregas;
+    if(fim) fim.setHours(23,59,59,999);
+    return state.entregas.filter(function(r){
+      if(!r.data) return false;
+      if(inicio && r.data < inicio) return false;
+      if(fim && r.data > fim) return false;
+      return true;
+    });
+  }
+
+  function computeVeiculoMotoristaRanks(entregas){
     var vehicles = {}, drivers = {};
-    state.entregas.forEach(function(r){
+    entregas.forEach(function(r){
       var ton = toTon(r.pesoNF);
       if(r.placa){
         if(!vehicles[r.placa]) vehicles[r.placa] = {chave:r.placa, viagens:0, toneladas:0};
@@ -2423,29 +2463,38 @@
     };
   }
 
-  function computeFastestPedidos(){
+  function getIndicadoresStatusPedidos(){
+    return state.indicadoresStatusPedidos || (state.indicadoresStatusPedidos = 'finalizado');
+  }
+
+  // Pedidos (finalizados OU em andamento, conforme o toggle) cujas entregas
+  // (dentro do período filtrado) definem o ritmo: dias entre a 1ª e a última
+  // viagem do pedido nesse recorte, e as toneladas/viagens somadas só dentro
+  // desse mesmo recorte.
+  function computeFastestPedidos(entregas, status){
     var byNumero = {};
-    state.entregas.forEach(function(r){
+    entregas.forEach(function(r){
       if(!r.numero || !r.data) return;
       (byNumero[r.numero] || (byNumero[r.numero] = [])).push(r);
     });
     var rows = state.pedidosView
-      .filter(function(p){ return p.status === 'finalizado'; })
+      .filter(function(p){ return p.status === status; })
       .map(function(p){
         var list = (byNumero[p.numero] || []).slice().sort(function(a,b){ return a.data - b.data; });
         if(!list.length) return null;
         var first = list[0].data, last = list[list.length-1].data;
         var dias = Math.max(1, Math.round((last - first) / 86400000) + 1);
-        return {numero:p.numero, cliente:p.cliente, dias:dias, toneladas:toTon(p.entregue), viagens:p.viagens};
+        var toneladas = list.reduce(function(s,r){ return s + toTon(r.pesoNF); }, 0);
+        return {numero:p.numero, cliente:p.cliente, dias:dias, toneladas:toneladas, viagens:list.length};
       })
       .filter(Boolean);
     rows.sort(function(a,b){ return (a.dias - b.dias) || (b.toneladas - a.toneladas); });
     return rows;
   }
 
-  function computeMonthlyTonnage(){
+  function computeMonthlyTonnage(entregas){
     var map = {};
-    state.entregas.forEach(function(r){
+    entregas.forEach(function(r){
       if(!r.data) return;
       var key = r.data.getFullYear() + '-' + String(r.data.getMonth()+1).padStart(2,'0');
       map[key] = (map[key] || 0) + toTon(r.pesoNF);
@@ -2457,9 +2506,9 @@
     };
   }
 
-  function computeTopClientes(){
+  function computeTopClientes(entregas){
     var map = {};
-    state.entregas.forEach(function(r){
+    entregas.forEach(function(r){
       var c = r.cliente || '—';
       map[c] = (map[c] || 0) + toTon(r.pesoNF);
     });
@@ -2487,8 +2536,13 @@
       '</tr></thead><tbody>'+renderRankRows(items, sortField)+'</tbody></table></div>';
   }
 
-  function renderFastestPedidosTable(rows){
-    if(!rows.length) return '<p class="indicadores-empty">Nenhum pedido finalizado com dados suficientes ainda.</p>';
+  function renderFastestPedidosTable(rows, isFinalizado){
+    if(!rows.length){
+      return '<p class="indicadores-empty">' + (isFinalizado ?
+        'Nenhum pedido finalizado com dados suficientes ainda.' :
+        'Nenhum pedido em andamento com dados suficientes ainda.') + '</p>';
+    }
+    var diasLabel = isFinalizado ? 'Dias p/ concluir' : 'Dias em atendimento';
     var trs = rows.map(function(r, idx){
       return '<tr' + (idx===0 ? ' class="rank-first"' : '') + '>' +
         '<td class="num rank-pos">'+(idx+1)+'</td>' +
@@ -2500,19 +2554,34 @@
       '</tr>';
     }).join('');
     return '<div class="table-wrap indicadores-rank-table"><table><thead><tr>' +
-      '<th>#</th><th>Pedido</th><th>Cliente</th><th class="num">Dias p/ concluir</th><th class="num">Toneladas</th><th class="num">Viagens</th>' +
+      '<th>#</th><th>Pedido</th><th>Cliente</th><th class="num">'+diasLabel+'</th><th class="num">Toneladas</th><th class="num">Viagens</th>' +
       '</tr></thead><tbody>'+trs+'</tbody></table></div>';
   }
 
-  function buildIndicadoresHtml(){
-    var ranks = computeVeiculoMotoristaRanks();
-    var fastest = computeFastestPedidos();
-    var totalTon = state.entregas.reduce(function(s,r){ return s + toTon(r.pesoNF); }, 0);
-    var totalViagens = state.entregas.length;
+  function buildIndicadoresFiltroHtml(){
+    var f = getIndicadoresFiltro();
+    return (
+      '<div class="indicadores-filtro">' +
+        '<div class="field"><label>Período — de</label><input type="date" id="indicadores-periodo-inicio" value="'+(f.inicio||'')+'"></div>' +
+        '<div class="field"><label>até</label><input type="date" id="indicadores-periodo-fim" value="'+(f.fim||'')+'"></div>' +
+        '<div class="indicadores-filtro-actions"><button type="button" id="indicadores-periodo-limpar">Limpar período</button></div>' +
+        '<p class="indicadores-filtro-info" id="indicadores-filtro-info"></p>' +
+      '</div>' +
+      '<div id="indicadores-resultados"></div>'
+    );
+  }
+
+  function buildIndicadoresResultadosHtml(entregas){
+    var ranks = computeVeiculoMotoristaRanks(entregas);
+    var statusPedidos = getIndicadoresStatusPedidos();
+    var isFinalizado = statusPedidos === 'finalizado';
+    var fastest = computeFastestPedidos(entregas, statusPedidos);
+    var totalTon = entregas.reduce(function(s,r){ return s + toTon(r.pesoNF); }, 0);
+    var totalViagens = entregas.length;
     var veiculosAtivos = ranks.vehicles.length;
     var motoristasAtivos = ranks.drivers.length;
     var clientesAtendidos = {};
-    state.entregas.forEach(function(r){ if(r.cliente) clientesAtendidos[r.cliente] = true; });
+    entregas.forEach(function(r){ if(r.cliente) clientesAtendidos[r.cliente] = true; });
 
     return (
       '<div class="kpi-strip indicadores-kpis">' +
@@ -2542,9 +2611,15 @@
       '</div>' +
 
       '<div class="indicadores-section">' +
-        '<p class="indicadores-section-title"><span class="dot"></span>Pedidos atendidos mais rápidos</p>' +
-        '<p class="indicadores-section-sub">Pedidos finalizados, do menor para o maior tempo entre a primeira e a última viagem.</p>' +
-        renderFastestPedidosTable(fastest) +
+        '<p class="indicadores-section-title"><span class="dot"></span>'+(isFinalizado ? 'Pedidos finalizados mais rápidos' : 'Pedidos em andamento — ritmo atual')+'</p>' +
+        '<p class="indicadores-section-sub">'+(isFinalizado ?
+          'Pedidos finalizados, do menor para o maior tempo entre a primeira e a última viagem.' :
+          'Pedidos ainda em atendimento, do menor para o maior tempo decorrido desde a primeira viagem até agora.')+'</p>' +
+        '<div class="indicadores-toggle">' +
+          '<button type="button" class="indicadores-status-btn'+(isFinalizado?' active':'')+'" data-status="finalizado">Finalizados</button>' +
+          '<button type="button" class="indicadores-status-btn'+(!isFinalizado?' active':'')+'" data-status="andamento">Em andamento</button>' +
+        '</div>' +
+        renderFastestPedidosTable(fastest, isFinalizado) +
       '</div>' +
 
       '<div class="indicadores-section">' +
@@ -2561,11 +2636,11 @@
     );
   }
 
-  function renderIndicadoresCharts(){
-    var muted = '#6B7280', gridColor = '#E5E7EB', barColor = '#4F46E5', barHoverColor = '#4338CA';
+  function renderIndicadoresCharts(entregas){
+    var muted = '#6B7280', gridColor = '#E5E7EB', barColor = '#F97316', barHoverColor = '#EA580C';
 
     if(state.indicadoresCharts.mensal){ state.indicadoresCharts.mensal.destroy(); }
-    var mensal = computeMonthlyTonnage();
+    var mensal = computeMonthlyTonnage(entregas);
     var canvasMensal = document.getElementById('indicadores-chart-mensal');
     if(canvasMensal){
       state.indicadoresCharts.mensal = new Chart(canvasMensal, {
@@ -2583,7 +2658,7 @@
     }
 
     if(state.indicadoresCharts.clientes){ state.indicadoresCharts.clientes.destroy(); }
-    var top = computeTopClientes();
+    var top = computeTopClientes(entregas);
     var canvasClientes = document.getElementById('indicadores-chart-clientes');
     if(canvasClientes){
       state.indicadoresCharts.clientes = new Chart(canvasClientes, {
@@ -2601,10 +2676,43 @@
     }
   }
 
+  function renderIndicadoresResultados(){
+    var entregas = filteredEntregasForIndicadores();
+    document.getElementById('indicadores-resultados').innerHTML = buildIndicadoresResultadosHtml(entregas);
+    renderIndicadoresCharts(entregas);
+    document.querySelectorAll('.indicadores-status-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        state.indicadoresStatusPedidos = btn.getAttribute('data-status');
+        renderIndicadoresResultados();
+      });
+    });
+
+    var f = getIndicadoresFiltro();
+    var info = document.getElementById('indicadores-filtro-info');
+    if(info){
+      info.textContent = (f.inicio || f.fim) ?
+        (entregas.length + ' viagem(ns) no período selecionado') :
+        'Sem filtro — mostrando todo o histórico';
+    }
+  }
+
+  function wireIndicadoresFiltro(){
+    var ini = document.getElementById('indicadores-periodo-inicio');
+    var fim = document.getElementById('indicadores-periodo-fim');
+    ini.addEventListener('change', function(){ getIndicadoresFiltro().inicio = ini.value; renderIndicadoresResultados(); });
+    fim.addEventListener('change', function(){ getIndicadoresFiltro().fim = fim.value; renderIndicadoresResultados(); });
+    document.getElementById('indicadores-periodo-limpar').addEventListener('click', function(){
+      state.indicadoresPeriodo = {inicio:'', fim:''};
+      ini.value = ''; fim.value = '';
+      renderIndicadoresResultados();
+    });
+  }
+
   function openIndicadoresPanel(){
-    document.getElementById('indicadores-body').innerHTML = buildIndicadoresHtml();
+    document.getElementById('indicadores-body').innerHTML = buildIndicadoresFiltroHtml();
+    wireIndicadoresFiltro();
+    renderIndicadoresResultados();
     document.getElementById('indicadores-overlay').classList.add('open');
-    renderIndicadoresCharts();
   }
 
   function closeIndicadoresPanel(){
