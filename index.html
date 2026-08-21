@@ -29,6 +29,12 @@
     --green-border:#86EFAC;
     --red:#DC2626;
     --red-dim:#FEF2F2;
+    --indigo:#4F46E5;
+    --indigo-dark:#4338CA;
+    --indigo-text:#4338CA;
+    --indigo-dim:#EEF2FF;
+    --indigo-border:#C7D2FE;
+    --shadow-button-indigo:0 4px 12px rgba(79,70,229,0.28);
     --text:#111827;
     --muted:#6B7280;
     --faint:#9CA3AF;
@@ -99,6 +105,16 @@
     transition:filter .15s, transform .15s;
   }
   button.primary:hover{filter:brightness(1.05);transform:translateY(-1px);border-color:transparent;background:linear-gradient(135deg, var(--orange), var(--orange-dark));color:#FFFFFF;}
+  .indicadores-btn{
+    display:inline-flex;align-items:center;gap:7px;
+    background:linear-gradient(135deg, var(--indigo), var(--indigo-dark));
+    color:#FFFFFF;border:none;border-radius:var(--radius-button);
+    padding:10px 16px 10px 13px;font-weight:600;font-size:9.5px;
+    box-shadow:var(--shadow-button-indigo);
+    transition:filter .15s, transform .15s;
+  }
+  .indicadores-btn:hover{filter:brightness(1.08);transform:translateY(-1px);background:linear-gradient(135deg, var(--indigo), var(--indigo-dark));color:#FFFFFF;}
+  .indicadores-btn svg{width:14px;height:14px;flex-shrink:0;}
 
   /* ---------- LAYOUT CONGELADO ---------- */
   main{
@@ -629,6 +645,84 @@
     body.printing-fatura .inv-doc{border:none;box-shadow:none;border-radius:0;}
   }
 
+  /* ---------- SENHA (popup de acesso restrito) ---------- */
+  .senha-modal-overlay{
+    display:none;position:fixed;inset:0;z-index:300;
+    background:rgba(17,24,39,0.55);
+    align-items:center;justify-content:center;padding:16px;
+  }
+  .senha-modal-overlay.open{display:flex;}
+  .senha-modal{
+    background:var(--surface);border-radius:var(--radius-detail);width:min(360px,100%);
+    box-shadow:0 20px 60px rgba(15,23,42,0.35);padding:26px 26px 22px;text-align:center;
+  }
+  .senha-modal-icon{
+    width:46px;height:46px;border-radius:50%;background:var(--indigo-dim);color:var(--indigo-text);
+    display:flex;align-items:center;justify-content:center;margin:0 auto 14px;
+  }
+  .senha-modal-icon svg{width:22px;height:22px;}
+  .senha-modal h2{margin:0 0 4px;font-size:16px;font-weight:700;letter-spacing:-.01em;}
+  .senha-modal-sub{margin:0 0 18px;font-size:12.5px;color:var(--muted);line-height:1.4;}
+  .senha-modal .field{text-align:left;margin-bottom:6px;}
+  .senha-modal .field input{width:100%;text-align:center;letter-spacing:.05em;font-size:14px;}
+  .senha-erro{
+    display:none;margin:8px 0 0;font-size:12px;color:var(--red);background:var(--red-dim);
+    border:1px solid var(--red);border-radius:8px;padding:7px 10px;
+  }
+  .senha-erro.show{display:block;}
+  .senha-actions{display:flex;gap:10px;margin-top:18px;}
+  .senha-actions button{flex:1;padding:9px 14px;font-size:12px;}
+
+  /* ---------- INDICADORES (janela lateral) ---------- */
+  .indicadores-overlay{
+    display:none;position:fixed;inset:0;z-index:250;background:rgba(17,24,39,0.4);
+  }
+  .indicadores-overlay.open{display:block;}
+  .indicadores-panel{
+    position:fixed;top:0;right:0;bottom:0;width:min(760px,94vw);
+    background:var(--surface);box-shadow:-16px 0 44px rgba(15,23,42,0.25);
+    display:flex;flex-direction:column;
+    transform:translateX(100%);transition:transform .28s cubic-bezier(.32,.72,0,1);
+  }
+  .indicadores-overlay.open .indicadores-panel{transform:translateX(0);}
+  .indicadores-head{
+    display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
+    padding:18px 24px;border-bottom:1px solid var(--border);
+    background:linear-gradient(135deg, var(--indigo-dim), var(--surface));
+  }
+  .indicadores-head-title{display:flex;align-items:center;gap:10px;}
+  .indicadores-head-title svg{width:20px;height:20px;color:var(--indigo-text);flex-shrink:0;}
+  .indicadores-head h2{margin:0;font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--indigo-text);}
+  .indicadores-body{
+    flex:1;overflow-y:auto;min-height:0;padding:22px 24px 40px;
+    scrollbar-width:thin;scrollbar-color:var(--indigo) var(--surface-2);
+  }
+  .indicadores-body::-webkit-scrollbar{width:9px;}
+  .indicadores-body::-webkit-scrollbar-track{background:var(--surface-2);}
+  .indicadores-body::-webkit-scrollbar-thumb{background:var(--indigo);border-radius:9px;}
+  .indicadores-kpis{margin:0 0 26px;}
+  .indicadores-section{margin-bottom:30px;}
+  .indicadores-section:last-child{margin-bottom:4px;}
+  .indicadores-section-title{
+    margin:0 0 4px;font-size:14px;font-weight:700;letter-spacing:-.01em;color:var(--text);
+    display:flex;align-items:center;gap:8px;
+  }
+  .indicadores-section-title .dot{width:8px;height:8px;border-radius:50%;background:var(--indigo);flex-shrink:0;}
+  .indicadores-section-sub{margin:0 0 14px;font-size:11.5px;color:var(--charcoal-light);line-height:1.5;}
+  .indicadores-two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media (max-width:720px){.indicadores-two-col{grid-template-columns:1fr;}}
+  .indicadores-col-title{margin:0 0 8px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);}
+  .indicadores-rank-table table{min-width:0;font-size:12px;}
+  .indicadores-rank-table{max-height:340px;overflow-y:auto;}
+  .rank-pos{width:26px;color:var(--muted);font-weight:700;}
+  tr.rank-first td{color:var(--indigo-text);font-weight:700;background:var(--indigo-dim);}
+  .indicadores-chart-card{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);
+    padding:16px 18px;box-shadow:var(--shadow-card);
+  }
+  .indicadores-chart-card canvas{max-height:260px;}
+  .indicadores-empty{font-size:12.5px;color:var(--charcoal-light);padding:14px 0;}
+
   footer{padding:26px clamp(16px,4vw,52px);color:var(--faint);font-size:11px;text-align:center;border-top:1px solid var(--border);}
 
   @media (max-width:600px){
@@ -656,6 +750,12 @@
     <div class="header-meta">
       <span id="last-updated">Carregando dados…</span>
       <button id="fatura-btn" type="button">Emitir fatura</button>
+      <button id="indicadores-btn" type="button" class="indicadores-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 20V10"/><path d="M12 20V4"/><path d="M20 20v-7"/>
+        </svg>
+        Indicadores
+      </button>
       <button id="refresh-btn" class="primary" type="button">Atualizar dados</button>
     </div>
   </div>
@@ -811,6 +911,42 @@
   </div>
 </div>
 
+<div id="senha-modal-overlay" class="senha-modal-overlay">
+  <div class="senha-modal" role="dialog" aria-modal="true" aria-label="Área restrita">
+    <div class="senha-modal-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>
+      </svg>
+    </div>
+    <h2>Área restrita</h2>
+    <p class="senha-modal-sub" id="senha-modal-sub">Informe a senha para continuar.</p>
+    <div class="field">
+      <label>Senha</label>
+      <input type="password" id="senha-input" autocomplete="off">
+    </div>
+    <p id="senha-erro" class="senha-erro">Senha incorreta. Tente novamente.</p>
+    <div class="senha-actions">
+      <button type="button" id="senha-cancelar">Cancelar</button>
+      <button type="button" id="senha-confirmar" class="primary">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<div id="indicadores-overlay" class="indicadores-overlay">
+  <div class="indicadores-panel" role="dialog" aria-modal="true" aria-label="Indicadores">
+    <div class="indicadores-head">
+      <div class="indicadores-head-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 20V10"/><path d="M12 20V4"/><path d="M20 20v-7"/>
+        </svg>
+        <h2>Indicadores</h2>
+      </div>
+      <button type="button" id="indicadores-close" class="fatura-modal-close" aria-label="Fechar">&times;</button>
+    </div>
+    <div class="indicadores-body" id="indicadores-body"></div>
+  </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -826,6 +962,7 @@
   var URL_CLIENTES = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSdkSQeP4qZxXxt1zRkY_wAY_OUIHORpdEF8DeQ8-XYlb3gDdtFQ8z18E4C5TdM_owA7lqeZLtd9XDw/pub?gid=456497136&single=true&output=csv";
 
   var TRUCK_TON = 48000; // capacidade do caminhão: 48 toneladas = 48.000 kg (dados internos são em kg)
+  var SENHA_RESTRITA = "Pesados@Fatura"; // senha de acesso a "Emitir fatura" e "Indicadores"
 
   var state = {
     pedidosRaw:null, entregasRaw:null, clientesRaw:null, clientesMap:{}, pedidosView:[], entregas:[],
@@ -836,7 +973,9 @@
     chartMetricByPedido:{},
     chartRangeByPedido:{},
     chartProjectionByPedido:{},
-    detailCharts:{}
+    detailCharts:{},
+    senhaCallback:null,
+    indicadoresCharts:{}
   };
 
   function getTipos(numero){ return state.selectedTiposByPedido[numero] || (state.selectedTiposByPedido[numero] = []); }
@@ -2216,8 +2355,274 @@
     }, 300);
   }
 
+  /* ================= SENHA (acesso restrito) ================= */
+
+  function pedirSenha(onSuccess){
+    state.senhaCallback = onSuccess;
+    var overlay = document.getElementById('senha-modal-overlay');
+    var input = document.getElementById('senha-input');
+    var erro = document.getElementById('senha-erro');
+    input.value = '';
+    erro.classList.remove('show');
+    overlay.classList.add('open');
+    setTimeout(function(){ input.focus(); }, 60);
+  }
+
+  function confirmarSenha(){
+    var input = document.getElementById('senha-input');
+    var erro = document.getElementById('senha-erro');
+    if(input.value === SENHA_RESTRITA){
+      var cb = state.senhaCallback;
+      fecharSenhaModal();
+      if(cb) cb();
+    } else {
+      erro.classList.add('show');
+      input.value = '';
+      input.focus();
+    }
+  }
+
+  function fecharSenhaModal(){
+    document.getElementById('senha-modal-overlay').classList.remove('open');
+    state.senhaCallback = null;
+  }
+
+  function wireSenhaModal(){
+    document.getElementById('senha-confirmar').addEventListener('click', confirmarSenha);
+    document.getElementById('senha-cancelar').addEventListener('click', fecharSenhaModal);
+    document.getElementById('senha-modal-overlay').addEventListener('click', function(ev){
+      if(ev.target.id === 'senha-modal-overlay') fecharSenhaModal();
+    });
+    document.getElementById('senha-input').addEventListener('keydown', function(ev){
+      if(ev.key === 'Enter'){ ev.preventDefault(); confirmarSenha(); }
+    });
+  }
+
+  /* ================= INDICADORES ================= */
+
+  var MESES_ABBR = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+  function computeVeiculoMotoristaRanks(){
+    var vehicles = {}, drivers = {};
+    state.entregas.forEach(function(r){
+      var ton = toTon(r.pesoNF);
+      if(r.placa){
+        if(!vehicles[r.placa]) vehicles[r.placa] = {chave:r.placa, viagens:0, toneladas:0};
+        vehicles[r.placa].viagens++;
+        vehicles[r.placa].toneladas += ton;
+      }
+      if(r.motorista){
+        if(!drivers[r.motorista]) drivers[r.motorista] = {chave:r.motorista, viagens:0, toneladas:0};
+        drivers[r.motorista].viagens++;
+        drivers[r.motorista].toneladas += ton;
+      }
+    });
+    return {
+      vehicles: Object.keys(vehicles).map(function(k){ return vehicles[k]; }),
+      drivers: Object.keys(drivers).map(function(k){ return drivers[k]; })
+    };
+  }
+
+  function computeFastestPedidos(){
+    var byNumero = {};
+    state.entregas.forEach(function(r){
+      if(!r.numero || !r.data) return;
+      (byNumero[r.numero] || (byNumero[r.numero] = [])).push(r);
+    });
+    var rows = state.pedidosView
+      .filter(function(p){ return p.status === 'finalizado'; })
+      .map(function(p){
+        var list = (byNumero[p.numero] || []).slice().sort(function(a,b){ return a.data - b.data; });
+        if(!list.length) return null;
+        var first = list[0].data, last = list[list.length-1].data;
+        var dias = Math.max(1, Math.round((last - first) / 86400000) + 1);
+        return {numero:p.numero, cliente:p.cliente, dias:dias, toneladas:toTon(p.entregue), viagens:p.viagens};
+      })
+      .filter(Boolean);
+    rows.sort(function(a,b){ return (a.dias - b.dias) || (b.toneladas - a.toneladas); });
+    return rows;
+  }
+
+  function computeMonthlyTonnage(){
+    var map = {};
+    state.entregas.forEach(function(r){
+      if(!r.data) return;
+      var key = r.data.getFullYear() + '-' + String(r.data.getMonth()+1).padStart(2,'0');
+      map[key] = (map[key] || 0) + toTon(r.pesoNF);
+    });
+    var keys = Object.keys(map).sort();
+    return {
+      labels: keys.map(function(k){ var p = k.split('-'); return MESES_ABBR[parseInt(p[1],10)-1] + '/' + p[0].slice(2); }),
+      data: keys.map(function(k){ return map[k]; })
+    };
+  }
+
+  function computeTopClientes(){
+    var map = {};
+    state.entregas.forEach(function(r){
+      var c = r.cliente || '—';
+      map[c] = (map[c] || 0) + toTon(r.pesoNF);
+    });
+    var arr = Object.keys(map).map(function(k){ return {cliente:k, toneladas:map[k]}; });
+    arr.sort(function(a,b){ return b.toneladas - a.toneladas; });
+    return arr.slice(0, 10);
+  }
+
+  function renderRankRows(items, sortField){
+    var sorted = items.slice().sort(function(a,b){ return b[sortField] - a[sortField]; });
+    return sorted.map(function(it, idx){
+      return '<tr' + (idx===0 ? ' class="rank-first"' : '') + '>' +
+        '<td class="num rank-pos">'+(idx+1)+'</td>' +
+        '<td>'+it.chave+'</td>' +
+        '<td class="num">'+it.viagens+'</td>' +
+        '<td class="num">'+fmtNum(it.toneladas,0)+' ton</td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  function renderRankTable(items, keyLabel, sortField){
+    if(!items.length) return '<p class="indicadores-empty">Sem dados disponíveis.</p>';
+    return '<div class="table-wrap indicadores-rank-table"><table><thead><tr>' +
+      '<th>#</th><th>'+keyLabel+'</th><th class="num">Viagens</th><th class="num">Toneladas</th>' +
+      '</tr></thead><tbody>'+renderRankRows(items, sortField)+'</tbody></table></div>';
+  }
+
+  function renderFastestPedidosTable(rows){
+    if(!rows.length) return '<p class="indicadores-empty">Nenhum pedido finalizado com dados suficientes ainda.</p>';
+    var trs = rows.map(function(r, idx){
+      return '<tr' + (idx===0 ? ' class="rank-first"' : '') + '>' +
+        '<td class="num rank-pos">'+(idx+1)+'</td>' +
+        '<td>'+r.numero+'</td>' +
+        '<td>'+(r.cliente||'—')+'</td>' +
+        '<td class="num">'+r.dias+' dia(s)</td>' +
+        '<td class="num">'+fmtNum(r.toneladas,0)+' ton</td>' +
+        '<td class="num">'+r.viagens+'</td>' +
+      '</tr>';
+    }).join('');
+    return '<div class="table-wrap indicadores-rank-table"><table><thead><tr>' +
+      '<th>#</th><th>Pedido</th><th>Cliente</th><th class="num">Dias p/ concluir</th><th class="num">Toneladas</th><th class="num">Viagens</th>' +
+      '</tr></thead><tbody>'+trs+'</tbody></table></div>';
+  }
+
+  function buildIndicadoresHtml(){
+    var ranks = computeVeiculoMotoristaRanks();
+    var fastest = computeFastestPedidos();
+    var totalTon = state.entregas.reduce(function(s,r){ return s + toTon(r.pesoNF); }, 0);
+    var totalViagens = state.entregas.length;
+    var veiculosAtivos = ranks.vehicles.length;
+    var motoristasAtivos = ranks.drivers.length;
+    var clientesAtendidos = {};
+    state.entregas.forEach(function(r){ if(r.cliente) clientesAtendidos[r.cliente] = true; });
+
+    return (
+      '<div class="kpi-strip indicadores-kpis">' +
+        '<div class="kpi orange"><p class="kpi-label">Total entregue</p><p class="kpi-value">'+fmtNum(totalTon,0)+'<span>ton</span></p></div>' +
+        '<div class="kpi"><p class="kpi-label">Viagens realizadas</p><p class="kpi-value">'+totalViagens+'</p></div>' +
+        '<div class="kpi"><p class="kpi-label">Veículos ativos</p><p class="kpi-value">'+veiculosAtivos+'</p></div>' +
+        '<div class="kpi"><p class="kpi-label">Motoristas ativos</p><p class="kpi-value">'+motoristasAtivos+'</p></div>' +
+        '<div class="kpi"><p class="kpi-label">Clientes atendidos</p><p class="kpi-value">'+Object.keys(clientesAtendidos).length+'</p></div>' +
+      '</div>' +
+
+      '<div class="indicadores-section">' +
+        '<p class="indicadores-section-title"><span class="dot"></span>Ranking de veículos</p>' +
+        '<p class="indicadores-section-sub">Todos os veículos com viagens registradas — ordenado do maior para o menor em cada coluna (o primeiro da lista é o destaque).</p>' +
+        '<div class="indicadores-two-col">' +
+          '<div><p class="indicadores-col-title">Por viagens</p>'+renderRankTable(ranks.vehicles,'Placa','viagens')+'</div>' +
+          '<div><p class="indicadores-col-title">Por toneladas</p>'+renderRankTable(ranks.vehicles,'Placa','toneladas')+'</div>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="indicadores-section">' +
+        '<p class="indicadores-section-title"><span class="dot"></span>Ranking de motoristas</p>' +
+        '<p class="indicadores-section-sub">Todos os motoristas com viagens registradas — mesma leitura: topo da lista é o maior valor.</p>' +
+        '<div class="indicadores-two-col">' +
+          '<div><p class="indicadores-col-title">Por viagens</p>'+renderRankTable(ranks.drivers,'Motorista','viagens')+'</div>' +
+          '<div><p class="indicadores-col-title">Por toneladas</p>'+renderRankTable(ranks.drivers,'Motorista','toneladas')+'</div>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="indicadores-section">' +
+        '<p class="indicadores-section-title"><span class="dot"></span>Pedidos atendidos mais rápidos</p>' +
+        '<p class="indicadores-section-sub">Pedidos finalizados, do menor para o maior tempo entre a primeira e a última viagem.</p>' +
+        renderFastestPedidosTable(fastest) +
+      '</div>' +
+
+      '<div class="indicadores-section">' +
+        '<p class="indicadores-section-title"><span class="dot"></span>Evolução mensal de toneladas entregues</p>' +
+        '<p class="indicadores-section-sub">Soma de toneladas entregues por mês, considerando todas as viagens registradas.</p>' +
+        '<div class="indicadores-chart-card"><canvas id="indicadores-chart-mensal" height="90"></canvas></div>' +
+      '</div>' +
+
+      '<div class="indicadores-section">' +
+        '<p class="indicadores-section-title"><span class="dot"></span>Top 10 clientes por volume entregue</p>' +
+        '<p class="indicadores-section-sub">Clientes com maior soma de toneladas entregues no histórico.</p>' +
+        '<div class="indicadores-chart-card"><canvas id="indicadores-chart-clientes" height="140"></canvas></div>' +
+      '</div>'
+    );
+  }
+
+  function renderIndicadoresCharts(){
+    var muted = '#6B7280', gridColor = '#E5E7EB', barColor = '#4F46E5', barHoverColor = '#4338CA';
+
+    if(state.indicadoresCharts.mensal){ state.indicadoresCharts.mensal.destroy(); }
+    var mensal = computeMonthlyTonnage();
+    var canvasMensal = document.getElementById('indicadores-chart-mensal');
+    if(canvasMensal){
+      state.indicadoresCharts.mensal = new Chart(canvasMensal, {
+        type:'bar',
+        data:{ labels: mensal.labels, datasets:[{ label:'Toneladas', data: mensal.data, backgroundColor:barColor, hoverBackgroundColor:barHoverColor, borderRadius:6, maxBarThickness:36 }] },
+        options:{
+          responsive:true, maintainAspectRatio:false,
+          plugins:{ legend:{display:false}, tooltip:{ backgroundColor:'#111827', padding:10, cornerRadius:8, callbacks:{ label:function(ctx){ return fmtNum(ctx.parsed.y,0)+' ton'; } } } },
+          scales:{
+            x:{ ticks:{ color:muted, font:{family:'Inter'} }, grid:{ display:false } },
+            y:{ ticks:{ color:muted, font:{family:'Inter'}, precision:0, callback:function(v){ return fmtNum(v,0); } }, grid:{ color:gridColor } }
+          }
+        }
+      });
+    }
+
+    if(state.indicadoresCharts.clientes){ state.indicadoresCharts.clientes.destroy(); }
+    var top = computeTopClientes();
+    var canvasClientes = document.getElementById('indicadores-chart-clientes');
+    if(canvasClientes){
+      state.indicadoresCharts.clientes = new Chart(canvasClientes, {
+        type:'bar',
+        data:{ labels: top.map(function(c){ return c.cliente; }), datasets:[{ label:'Toneladas', data: top.map(function(c){ return c.toneladas; }), backgroundColor:barColor, hoverBackgroundColor:barHoverColor, borderRadius:6, maxBarThickness:26 }] },
+        options:{
+          indexAxis:'y', responsive:true, maintainAspectRatio:false,
+          plugins:{ legend:{display:false}, tooltip:{ backgroundColor:'#111827', padding:10, cornerRadius:8, callbacks:{ label:function(ctx){ return fmtNum(ctx.parsed.x,0)+' ton'; } } } },
+          scales:{
+            x:{ ticks:{ color:muted, font:{family:'Inter'}, precision:0, callback:function(v){ return fmtNum(v,0); } }, grid:{ color:gridColor } },
+            y:{ ticks:{ color:muted, font:{family:'Inter'} }, grid:{ display:false } }
+          }
+        }
+      });
+    }
+  }
+
+  function openIndicadoresPanel(){
+    document.getElementById('indicadores-body').innerHTML = buildIndicadoresHtml();
+    document.getElementById('indicadores-overlay').classList.add('open');
+    renderIndicadoresCharts();
+  }
+
+  function closeIndicadoresPanel(){
+    document.getElementById('indicadores-overlay').classList.remove('open');
+  }
+
+  function wireIndicadoresModal(){
+    document.getElementById('indicadores-btn').addEventListener('click', function(){
+      pedirSenha(openIndicadoresPanel);
+    });
+    document.getElementById('indicadores-close').addEventListener('click', closeIndicadoresPanel);
+    document.getElementById('indicadores-overlay').addEventListener('click', function(ev){
+      if(ev.target.id === 'indicadores-overlay') closeIndicadoresPanel();
+    });
+  }
+
   function wireFaturaModal(){
-    document.getElementById('fatura-btn').addEventListener('click', openFaturaModal);
+    document.getElementById('fatura-btn').addEventListener('click', function(){ pedirSenha(openFaturaModal); });
     document.getElementById('fatura-modal-close').addEventListener('click', closeFaturaModal);
     document.getElementById('fatura-modal-overlay').addEventListener('click', function(ev){
       if(ev.target.id === 'fatura-modal-overlay') closeFaturaModal();
@@ -2298,6 +2703,8 @@
   document.getElementById('refresh-btn').addEventListener('click', loadData);
 
   wireFaturaModal();
+  wireSenhaModal();
+  wireIndicadoresModal();
 
   document.getElementById('expand-detail-btn').addEventListener('click', function(){
     var scrollBottom = document.querySelector('.scroll-bottom');
