@@ -704,12 +704,19 @@
     position:sticky;top:-22px;z-index:5;
     margin:-22px -24px 22px;padding:16px 24px;
     background:var(--surface);border-bottom:1px solid var(--border);
-    display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;
   }
+  .indicadores-filtro-row{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;}
+  .indicadores-filtro-row + .indicadores-filtro-row{margin-top:14px;align-items:flex-start;}
   .indicadores-filtro .field{flex:0 0 150px;}
   .indicadores-filtro-actions{display:flex;gap:8px;}
   .indicadores-filtro-actions button{padding:8px 14px;font-size:11.5px;}
   .indicadores-filtro-info{margin:0 0 0 auto;align-self:center;font-size:11px;color:var(--charcoal-light);text-align:right;max-width:220px;}
+  .indicadores-filtro-dropdowns .filter-dropdown{flex:1 1 200px;min-width:180px;}
+  .filter-search{
+    width:100%;box-sizing:border-box;margin-bottom:6px;padding:7px 9px;font-size:12.5px;
+    font-family:var(--font-display);border:1px solid var(--border);border-radius:8px;color:var(--text);
+  }
+  .filter-search:focus{outline:none;border-color:var(--orange);}
   .indicadores-kpis{margin:0 0 26px;}
   .indicadores-section{margin-bottom:30px;}
   .indicadores-section:last-child{margin-bottom:4px;}
@@ -730,7 +737,7 @@
     background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);
     padding:16px 18px;box-shadow:var(--shadow-card);
   }
-  .indicadores-chart-card canvas{max-height:260px;}
+  #indicadores-chart-mensal{max-height:260px;}
   .indicadores-empty{font-size:12.5px;color:var(--charcoal-light);padding:14px 0;}
   .indicadores-toggle{display:inline-flex;border:1px solid var(--border);border-radius:999px;overflow:hidden;background:var(--surface);margin-bottom:14px;}
   .indicadores-toggle button{
@@ -978,7 +985,7 @@
   var URL_CLIENTES = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSdkSQeP4qZxXxt1zRkY_wAY_OUIHORpdEF8DeQ8-XYlb3gDdtFQ8z18E4C5TdM_owA7lqeZLtd9XDw/pub?gid=456497136&single=true&output=csv";
 
   var TRUCK_TON = 48000; // capacidade do caminhão: 48 toneladas = 48.000 kg (dados internos são em kg)
-  var SENHA_RESTRITA = "Pesados@2026"; // senha de acesso a "Emitir fatura" e "Indicadores"
+  var SENHA_RESTRITA = "Pesados@Fatura"; // senha de acesso a "Emitir fatura" e "Indicadores"
 
   var state = {
     pedidosRaw:null, entregasRaw:null, clientesRaw:null, clientesMap:{}, pedidosView:[], entregas:[],
@@ -993,7 +1000,10 @@
     senhaCallback:null,
     indicadoresCharts:{},
     indicadoresPeriodo:{inicio:'', fim:''},
-    indicadoresStatusPedidos:'finalizado'
+    indicadoresStatusPedidos:'finalizado',
+    indicadoresFiltroClientes:[],
+    indicadoresFiltroPedidos:[],
+    indicadoresFiltroStatus:[]
   };
 
   function getTipos(numero){ return state.selectedTiposByPedido[numero] || (state.selectedTiposByPedido[numero] = []); }
@@ -1327,7 +1337,7 @@
   ];
 
   function closeAllFilterDropdowns(except){
-    ['status','client'].forEach(function(key){
+    ['status','client','ind-cliente','ind-pedido','ind-status'].forEach(function(key){
       if(key === except) return;
       var trigger = document.getElementById(key+'-filter-trigger');
       var panel = document.getElementById(key+'-filter-panel');
@@ -2424,20 +2434,52 @@
     return state.indicadoresPeriodo || (state.indicadoresPeriodo = {inicio:'', fim:''});
   }
 
-  // Retorna as entregas dentro do período escolhido no filtro do painel de
-  // Indicadores. Sem filtro definido, retorna todas as entregas (comportamento
-  // igual ao de antes do filtro existir). Com filtro, exige que a entrega
-  // tenha data (linhas sem data não entram quando um período é aplicado).
+  function getPedidoStatusMap(){
+    var map = {};
+    state.pedidosView.forEach(function(p){ map[p.numero] = p.status; });
+    return map;
+  }
+
+  function indicadoresClienteOptions(){
+    var set = {};
+    state.entregas.forEach(function(r){ if(r.cliente) set[r.cliente] = true; });
+    return Object.keys(set).sort();
+  }
+
+  function indicadoresPedidoOptions(){
+    var set = {};
+    state.entregas.forEach(function(r){ if(r.numero) set[r.numero] = true; });
+    return Object.keys(set).sort();
+  }
+
+  // Retorna as entregas que passam pelos filtros do painel de Indicadores:
+  // período, cliente, pedido e status do pedido. Sem nenhum filtro definido,
+  // retorna todas as entregas (comportamento igual ao de antes dos filtros
+  // existirem). O período exige que a entrega tenha data (linhas sem data não
+  // entram quando um período é aplicado); os demais filtros não exigem data.
   function filteredEntregasForIndicadores(){
     var f = getIndicadoresFiltro();
     var inicio = parseISODateInput(f.inicio);
     var fim = parseISODateInput(f.fim);
-    if(!inicio && !fim) return state.entregas;
+    var clientesSel = state.indicadoresFiltroClientes;
+    var pedidosSel = state.indicadoresFiltroPedidos;
+    var statusSel = state.indicadoresFiltroStatus;
+
+    if(!inicio && !fim && !clientesSel.length && !pedidosSel.length && !statusSel.length){
+      return state.entregas;
+    }
     if(fim) fim.setHours(23,59,59,999);
+    var statusMap = statusSel.length ? getPedidoStatusMap() : null;
+
     return state.entregas.filter(function(r){
-      if(!r.data) return false;
-      if(inicio && r.data < inicio) return false;
-      if(fim && r.data > fim) return false;
+      if(inicio || fim){
+        if(!r.data) return false;
+        if(inicio && r.data < inicio) return false;
+        if(fim && r.data > fim) return false;
+      }
+      if(clientesSel.length && clientesSel.indexOf(r.cliente) === -1) return false;
+      if(pedidosSel.length && pedidosSel.indexOf(r.numero) === -1) return false;
+      if(statusSel.length && statusSel.indexOf(statusMap[r.numero]) === -1) return false;
       return true;
     });
   }
@@ -2514,7 +2556,7 @@
     });
     var arr = Object.keys(map).map(function(k){ return {cliente:k, toneladas:map[k]}; });
     arr.sort(function(a,b){ return b.toneladas - a.toneladas; });
-    return arr.slice(0, 10);
+    return arr;
   }
 
   function renderRankRows(items, sortField){
@@ -2562,10 +2604,38 @@
     var f = getIndicadoresFiltro();
     return (
       '<div class="indicadores-filtro">' +
-        '<div class="field"><label>Período — de</label><input type="date" id="indicadores-periodo-inicio" value="'+(f.inicio||'')+'"></div>' +
-        '<div class="field"><label>até</label><input type="date" id="indicadores-periodo-fim" value="'+(f.fim||'')+'"></div>' +
-        '<div class="indicadores-filtro-actions"><button type="button" id="indicadores-periodo-limpar">Limpar período</button></div>' +
-        '<p class="indicadores-filtro-info" id="indicadores-filtro-info"></p>' +
+        '<div class="indicadores-filtro-row">' +
+          '<div class="field"><label>Período — de</label><input type="date" id="indicadores-periodo-inicio" value="'+(f.inicio||'')+'"></div>' +
+          '<div class="field"><label>até</label><input type="date" id="indicadores-periodo-fim" value="'+(f.fim||'')+'"></div>' +
+          '<div class="indicadores-filtro-actions"><button type="button" id="indicadores-periodo-limpar">Limpar filtros</button></div>' +
+          '<p class="indicadores-filtro-info" id="indicadores-filtro-info"></p>' +
+        '</div>' +
+        '<div class="indicadores-filtro-row indicadores-filtro-dropdowns">' +
+          '<div class="filter-dropdown" id="ind-cliente-filter-dropdown">' +
+            '<p class="filter-label">Cliente</p>' +
+            '<button type="button" class="filter-trigger" id="ind-cliente-filter-trigger">' +
+              '<span class="filter-trigger-text"><span class="filter-trigger-dot"></span><span id="ind-cliente-filter-trigger-label">Todos os clientes</span></span>' +
+              '<span class="filter-trigger-chevron" aria-hidden="true">▾</span>' +
+            '</button>' +
+            '<div class="filter-panel" id="ind-cliente-filter-panel"></div>' +
+          '</div>' +
+          '<div class="filter-dropdown" id="ind-pedido-filter-dropdown">' +
+            '<p class="filter-label">Pedido</p>' +
+            '<button type="button" class="filter-trigger" id="ind-pedido-filter-trigger">' +
+              '<span class="filter-trigger-text"><span class="filter-trigger-dot"></span><span id="ind-pedido-filter-trigger-label">Todos os pedidos</span></span>' +
+              '<span class="filter-trigger-chevron" aria-hidden="true">▾</span>' +
+            '</button>' +
+            '<div class="filter-panel" id="ind-pedido-filter-panel"></div>' +
+          '</div>' +
+          '<div class="filter-dropdown" id="ind-status-filter-dropdown">' +
+            '<p class="filter-label">Status do pedido</p>' +
+            '<button type="button" class="filter-trigger" id="ind-status-filter-trigger">' +
+              '<span class="filter-trigger-text"><span class="filter-trigger-dot"></span><span id="ind-status-filter-trigger-label">Todos os status</span></span>' +
+              '<span class="filter-trigger-chevron" aria-hidden="true">▾</span>' +
+            '</button>' +
+            '<div class="filter-panel" id="ind-status-filter-panel"></div>' +
+          '</div>' +
+        '</div>' +
       '</div>' +
       '<div id="indicadores-resultados"></div>'
     );
@@ -2587,8 +2657,8 @@
       '<div class="kpi-strip indicadores-kpis">' +
         '<div class="kpi orange"><p class="kpi-label">Total entregue</p><p class="kpi-value">'+fmtNum(totalTon,0)+'<span>ton</span></p></div>' +
         '<div class="kpi"><p class="kpi-label">Viagens realizadas</p><p class="kpi-value">'+totalViagens+'</p></div>' +
-        '<div class="kpi"><p class="kpi-label">Veículos ativos</p><p class="kpi-value">'+veiculosAtivos+'</p></div>' +
-        '<div class="kpi"><p class="kpi-label">Motoristas ativos</p><p class="kpi-value">'+motoristasAtivos+'</p></div>' +
+        '<div class="kpi"><p class="kpi-label">Veículos utilizados</p><p class="kpi-value">'+veiculosAtivos+'</p></div>' +
+        '<div class="kpi"><p class="kpi-label">Motoristas utilizados</p><p class="kpi-value">'+motoristasAtivos+'</p></div>' +
         '<div class="kpi"><p class="kpi-label">Clientes atendidos</p><p class="kpi-value">'+Object.keys(clientesAtendidos).length+'</p></div>' +
       '</div>' +
 
@@ -2629,15 +2699,15 @@
       '</div>' +
 
       '<div class="indicadores-section">' +
-        '<p class="indicadores-section-title"><span class="dot"></span>Top 10 clientes por volume entregue</p>' +
-        '<p class="indicadores-section-sub">Clientes com maior soma de toneladas entregues no histórico.</p>' +
-        '<div class="indicadores-chart-card"><canvas id="indicadores-chart-clientes" height="140"></canvas></div>' +
+        '<p class="indicadores-section-title"><span class="dot"></span>Clientes por volume entregue</p>' +
+        '<p class="indicadores-section-sub">Todos os clientes, do maior para o menor volume entregue (com o total ao final de cada barra).</p>' +
+        '<div class="indicadores-chart-card"><div style="position:relative;height:'+Math.max(200, computeTopClientes(entregas).length*34)+'px;"><canvas id="indicadores-chart-clientes"></canvas></div></div>' +
       '</div>'
     );
   }
 
   function renderIndicadoresCharts(entregas){
-    var muted = '#6B7280', gridColor = '#E5E7EB', barColor = '#F97316', barHoverColor = '#EA580C';
+    var muted = '#6B7280', gridColor = '#E5E7EB', barColor = '#F97316', barHoverColor = '#EA580C', textColor = '#111827';
 
     if(state.indicadoresCharts.mensal){ state.indicadoresCharts.mensal.destroy(); }
     var mensal = computeMonthlyTonnage(entregas);
@@ -2661,17 +2731,38 @@
     var top = computeTopClientes(entregas);
     var canvasClientes = document.getElementById('indicadores-chart-clientes');
     if(canvasClientes){
+      var clientesTotalizerPlugin = {
+        id: 'clientesTotalizer',
+        afterDatasetsDraw: function(chart){
+          var ctx = chart.ctx;
+          var meta = chart.getDatasetMeta(0);
+          if(!meta) return;
+          ctx.save();
+          ctx.fillStyle = textColor;
+          ctx.font = "700 10.5px Inter, sans-serif";
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'middle';
+          meta.data.forEach(function(bar, index){
+            var value = chart.data.datasets[0].data[index];
+            if(value === undefined || value === null) return;
+            ctx.fillText(fmtNum(value,0)+' ton', bar.x + 6, bar.y);
+          });
+          ctx.restore();
+        }
+      };
       state.indicadoresCharts.clientes = new Chart(canvasClientes, {
         type:'bar',
         data:{ labels: top.map(function(c){ return c.cliente; }), datasets:[{ label:'Toneladas', data: top.map(function(c){ return c.toneladas; }), backgroundColor:barColor, hoverBackgroundColor:barHoverColor, borderRadius:6, maxBarThickness:26 }] },
         options:{
           indexAxis:'y', responsive:true, maintainAspectRatio:false,
+          layout:{ padding:{ right:70 } },
           plugins:{ legend:{display:false}, tooltip:{ backgroundColor:'#111827', padding:10, cornerRadius:8, callbacks:{ label:function(ctx){ return fmtNum(ctx.parsed.x,0)+' ton'; } } } },
           scales:{
             x:{ ticks:{ color:muted, font:{family:'Inter'}, precision:0, callback:function(v){ return fmtNum(v,0); } }, grid:{ color:gridColor } },
             y:{ ticks:{ color:muted, font:{family:'Inter'} }, grid:{ display:false } }
           }
-        }
+        },
+        plugins:[clientesTotalizerPlugin]
       });
     }
   }
@@ -2690,10 +2781,167 @@
     var f = getIndicadoresFiltro();
     var info = document.getElementById('indicadores-filtro-info');
     if(info){
-      info.textContent = (f.inicio || f.fim) ?
-        (entregas.length + ' viagem(ns) no período selecionado') :
+      var algumFiltroAtivo = !!(f.inicio || f.fim ||
+        state.indicadoresFiltroClientes.length ||
+        state.indicadoresFiltroPedidos.length ||
+        state.indicadoresFiltroStatus.length);
+      info.textContent = algumFiltroAtivo ?
+        (entregas.length + ' viagem(ns) no filtro atual') :
         'Sem filtro — mostrando todo o histórico';
     }
+  }
+
+  function updateIndClienteTriggerLabel(){
+    var trigger = document.getElementById('ind-cliente-filter-trigger');
+    var label = document.getElementById('ind-cliente-filter-trigger-label');
+    var selected = state.indicadoresFiltroClientes;
+    if(!selected.length){ label.textContent = 'Todos os clientes'; trigger.classList.remove('has-value'); }
+    else if(selected.length === 1){ label.textContent = selected[0]; trigger.classList.add('has-value'); }
+    else { label.textContent = selected.length + ' clientes selecionados'; trigger.classList.add('has-value'); }
+  }
+
+  function renderIndClienteFilter(){
+    var opts = indicadoresClienteOptions();
+    var trigger = document.getElementById('ind-cliente-filter-trigger');
+    var panel = document.getElementById('ind-cliente-filter-panel');
+
+    panel.innerHTML =
+      '<input type="text" class="filter-search" id="ind-cliente-filter-search" placeholder="Buscar cliente...">' +
+      '<div id="ind-cliente-filter-options">' +
+        opts.map(function(c){
+          var active = state.indicadoresFiltroClientes.indexOf(c) !== -1;
+          return '<div class="filter-option'+(active?' active':'')+'" data-value="'+c.replace(/"/g,'&quot;')+'">' +
+            '<span class="filter-option-check">'+(active?'✓':'')+'</span>' +
+            '<span class="filter-option-label">'+c+'</span>' +
+          '</div>';
+        }).join('') +
+      '</div>';
+
+    panel.querySelectorAll('.filter-option').forEach(function(opt){
+      opt.addEventListener('click', function(){
+        var c = opt.getAttribute('data-value');
+        var idx = state.indicadoresFiltroClientes.indexOf(c);
+        var nowActive;
+        if(idx === -1){ state.indicadoresFiltroClientes.push(c); nowActive = true; }
+        else { state.indicadoresFiltroClientes.splice(idx,1); nowActive = false; }
+        opt.classList.toggle('active', nowActive);
+        opt.querySelector('.filter-option-check').textContent = nowActive ? '✓' : '';
+        updateIndClienteTriggerLabel();
+        renderIndicadoresResultados();
+      });
+    });
+
+    var search = document.getElementById('ind-cliente-filter-search');
+    search.addEventListener('click', function(ev){ ev.stopPropagation(); });
+    search.addEventListener('input', function(){
+      var q = normKey(search.value);
+      panel.querySelectorAll('#ind-cliente-filter-options .filter-option').forEach(function(opt){
+        var text = normKey(opt.textContent);
+        opt.style.display = (!q || text.indexOf(q) !== -1) ? '' : 'none';
+      });
+    });
+
+    updateIndClienteTriggerLabel();
+    trigger.onclick = function(){ toggleFilterDropdown('ind-cliente'); };
+  }
+
+  function updateIndPedidoTriggerLabel(){
+    var trigger = document.getElementById('ind-pedido-filter-trigger');
+    var label = document.getElementById('ind-pedido-filter-trigger-label');
+    var selected = state.indicadoresFiltroPedidos;
+    if(!selected.length){ label.textContent = 'Todos os pedidos'; trigger.classList.remove('has-value'); }
+    else if(selected.length === 1){ label.textContent = selected[0]; trigger.classList.add('has-value'); }
+    else { label.textContent = selected.length + ' pedidos selecionados'; trigger.classList.add('has-value'); }
+  }
+
+  function renderIndPedidoFilter(){
+    var opts = indicadoresPedidoOptions();
+    var trigger = document.getElementById('ind-pedido-filter-trigger');
+    var panel = document.getElementById('ind-pedido-filter-panel');
+
+    panel.innerHTML =
+      '<input type="text" class="filter-search" id="ind-pedido-filter-search" placeholder="Buscar pedido...">' +
+      '<div id="ind-pedido-filter-options">' +
+        opts.map(function(n){
+          var active = state.indicadoresFiltroPedidos.indexOf(n) !== -1;
+          return '<div class="filter-option'+(active?' active':'')+'" data-value="'+n.replace(/"/g,'&quot;')+'">' +
+            '<span class="filter-option-check">'+(active?'✓':'')+'</span>' +
+            '<span class="filter-option-label">'+n+'</span>' +
+          '</div>';
+        }).join('') +
+      '</div>';
+
+    panel.querySelectorAll('.filter-option').forEach(function(opt){
+      opt.addEventListener('click', function(){
+        var n = opt.getAttribute('data-value');
+        var idx = state.indicadoresFiltroPedidos.indexOf(n);
+        var nowActive;
+        if(idx === -1){ state.indicadoresFiltroPedidos.push(n); nowActive = true; }
+        else { state.indicadoresFiltroPedidos.splice(idx,1); nowActive = false; }
+        opt.classList.toggle('active', nowActive);
+        opt.querySelector('.filter-option-check').textContent = nowActive ? '✓' : '';
+        updateIndPedidoTriggerLabel();
+        renderIndicadoresResultados();
+      });
+    });
+
+    var search = document.getElementById('ind-pedido-filter-search');
+    search.addEventListener('click', function(ev){ ev.stopPropagation(); });
+    search.addEventListener('input', function(){
+      var q = normKey(search.value);
+      panel.querySelectorAll('#ind-pedido-filter-options .filter-option').forEach(function(opt){
+        var text = normKey(opt.textContent);
+        opt.style.display = (!q || text.indexOf(q) !== -1) ? '' : 'none';
+      });
+    });
+
+    updateIndPedidoTriggerLabel();
+    trigger.onclick = function(){ toggleFilterDropdown('ind-pedido'); };
+  }
+
+  function updateIndStatusTriggerLabel(){
+    var trigger = document.getElementById('ind-status-filter-trigger');
+    var label = document.getElementById('ind-status-filter-trigger-label');
+    var selected = state.indicadoresFiltroStatus;
+    if(!selected.length){ label.textContent = 'Todos os status'; trigger.classList.remove('has-value'); }
+    else if(selected.length === 1){
+      var opt = STATUS_OPTIONS.filter(function(o){ return o.key === selected[0]; })[0];
+      label.textContent = opt ? opt.label : selected[0];
+      trigger.classList.add('has-value');
+    } else {
+      label.textContent = selected.length + ' status selecionados';
+      trigger.classList.add('has-value');
+    }
+  }
+
+  function renderIndStatusFilter(){
+    var trigger = document.getElementById('ind-status-filter-trigger');
+    var panel = document.getElementById('ind-status-filter-panel');
+
+    panel.innerHTML = STATUS_OPTIONS.map(function(o){
+      var active = state.indicadoresFiltroStatus.indexOf(o.key) !== -1;
+      return '<div class="filter-option'+(active?' active':'')+'" data-value="'+o.key+'">' +
+        '<span class="filter-option-check">'+(active?'✓':'')+'</span>' +
+        '<span class="filter-option-label">'+o.label+'</span>' +
+      '</div>';
+    }).join('');
+
+    panel.querySelectorAll('.filter-option').forEach(function(opt){
+      opt.addEventListener('click', function(){
+        var s = opt.getAttribute('data-value');
+        var idx = state.indicadoresFiltroStatus.indexOf(s);
+        var nowActive;
+        if(idx === -1){ state.indicadoresFiltroStatus.push(s); nowActive = true; }
+        else { state.indicadoresFiltroStatus.splice(idx,1); nowActive = false; }
+        opt.classList.toggle('active', nowActive);
+        opt.querySelector('.filter-option-check').textContent = nowActive ? '✓' : '';
+        updateIndStatusTriggerLabel();
+        renderIndicadoresResultados();
+      });
+    });
+
+    updateIndStatusTriggerLabel();
+    trigger.onclick = function(){ toggleFilterDropdown('ind-status'); };
   }
 
   function wireIndicadoresFiltro(){
@@ -2701,9 +2949,20 @@
     var fim = document.getElementById('indicadores-periodo-fim');
     ini.addEventListener('change', function(){ getIndicadoresFiltro().inicio = ini.value; renderIndicadoresResultados(); });
     fim.addEventListener('change', function(){ getIndicadoresFiltro().fim = fim.value; renderIndicadoresResultados(); });
+
+    renderIndClienteFilter();
+    renderIndPedidoFilter();
+    renderIndStatusFilter();
+
     document.getElementById('indicadores-periodo-limpar').addEventListener('click', function(){
       state.indicadoresPeriodo = {inicio:'', fim:''};
+      state.indicadoresFiltroClientes = [];
+      state.indicadoresFiltroPedidos = [];
+      state.indicadoresFiltroStatus = [];
       ini.value = ''; fim.value = '';
+      renderIndClienteFilter();
+      renderIndPedidoFilter();
+      renderIndStatusFilter();
       renderIndicadoresResultados();
     });
   }
