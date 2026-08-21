@@ -1438,10 +1438,10 @@
         '<td>'+p.numero+'</td>' +
         '<td>'+(p.cliente||'—')+'</td>' +
         '<td>'+(p.produto||'—')+'</td>' +
-        '<td class="num">'+fmtNum(toTon(p.falta),1)+' ton</td>' +
+        '<td class="num">'+fmtNum(toTon(p.falta),0)+' ton</td>' +
         '<td class="num">'+p.viagensPendentes+'</td>' +
-        '<td class="num">'+(x.avgTonDia !== null ? fmtNum(x.avgTonDia,1)+' ton/dia' : '—')+'</td>' +
-        '<td class="num">'+(x.avgViagensDia !== null ? fmtNum(x.avgViagensDia,1)+' viagem/dia' : '—')+'</td>' +
+        '<td class="num">'+(x.avgTonDia !== null ? fmtNum(x.avgTonDia,0)+' ton/dia' : '—')+'</td>' +
+        '<td class="num">'+(x.avgViagensDia !== null ? fmtNum(x.avgViagensDia,0)+' viagem/dia' : '—')+'</td>' +
         '<td>'+(x.estDate ? fmtDate(x.estDate) : '—')+'</td>' +
       '</tr>';
     }).join('');
@@ -1451,7 +1451,7 @@
         '<p class="general-summary-title">Resumo geral — pedidos em atendimento</p>' +
         '<div class="detail-stats">' +
           '<div><p class="stat-label">Pedidos em atendimento</p><p class="stat-value">'+list.length+'</p></div>' +
-          '<div><p class="stat-label">Total faltante</p><p class="stat-value" style="color:var(--red)">'+fmtNum(totalFaltaTon,1)+' ton</p></div>' +
+          '<div><p class="stat-label">Total faltante</p><p class="stat-value" style="color:var(--red)">'+fmtNum(totalFaltaTon,0)+' ton</p></div>' +
           '<div><p class="stat-label">Viagens faltantes</p><p class="stat-value" style="color:var(--red)">'+totalViagensPendentes+'</p></div>' +
         '</div>' +
         '<div class="general-summary-projection">'+previsaoHtml+'</div>' +
@@ -1485,9 +1485,9 @@
 
     var statsHtml = p.contratado !== null ?
       '<div class="detail-stats">' +
-        '<div><p class="stat-label">Contratado</p><p class="stat-value">'+fmtNum(toTon(p.contratado),1)+' ton</p></div>' +
-        '<div><p class="stat-label">Atendido</p><p class="stat-value" style="color:var(--orange)">'+fmtNum(toTon(p.entregue),1)+' ton</p></div>' +
-        '<div><p class="stat-label">Falta</p><p class="stat-value" style="color:var(--red)">'+fmtNum(toTon(p.falta),1)+' ton</p></div>' +
+        '<div><p class="stat-label">Contratado</p><p class="stat-value">'+fmtNum(toTon(p.contratado),0)+' ton</p></div>' +
+        '<div><p class="stat-label">Atendido</p><p class="stat-value" style="color:var(--orange)">'+fmtNum(toTon(p.entregue),0)+' ton</p></div>' +
+        '<div><p class="stat-label">Falta</p><p class="stat-value" style="color:var(--red)">'+fmtNum(toTon(p.falta),0)+' ton</p></div>' +
         (p.valorTonelada ? '<div><p class="stat-label">Valor/ton</p><p class="stat-value">'+fmtCurrency(p.valorTonelada)+'</p></div>' : '') +
         '<div><p class="stat-label">Frete total</p><p class="stat-value">'+fmtCurrencyCompact(p.frete)+'</p></div>' +
         '<div><p class="stat-label">Valor pago</p><p class="stat-value" style="color:var(--orange)">'+fmtCurrencyCompact(valorPago)+'</p></div>' +
@@ -1496,7 +1496,7 @@
         '<div><p class="stat-label">Viagens pendentes</p><p class="stat-value" style="color:var(--red)">'+p.viagensPendentes+'</p></div>' +
       '</div>'
       :
-      '<div class="detail-stats"><div><p class="stat-label">Entregue</p><p class="stat-value" style="color:var(--orange)">'+fmtNum(toTon(p.entregue),1)+' ton</p></div><div><p class="stat-label">Viagens atendidas</p><p class="stat-value" style="color:var(--orange)">'+p.viagens+'</p></div></div>';
+      '<div class="detail-stats"><div><p class="stat-label">Entregue</p><p class="stat-value" style="color:var(--orange)">'+fmtNum(toTon(p.entregue),0)+' ton</p></div><div><p class="stat-label">Viagens atendidas</p><p class="stat-value" style="color:var(--orange)">'+p.viagens+'</p></div></div>';
 
     var tipoFilterHtml = tipos.length > 1 ?
       '<div class="tipo-filter-row">' + tipos.map(function(t){
@@ -1573,7 +1573,7 @@
         '<td>'+(r.tipo||'—')+'</td>' +
         '<td>'+(r.nf||'—')+'</td>' +
         '<td>'+(r.cte||'—')+'</td>' +
-        '<td class="num">'+fmtNum(toTon(r.pesoNF),2)+' ton</td>' +
+        '<td class="num">'+fmtNum(toTon(r.pesoNF),0)+' ton</td>' +
         '<td class="num">'+fmtCurrency(r.valorKg)+'</td>' +
         '<td class="num">'+fmtCurrencyCompact(r.freteTotal)+'</td>' +
         '<td>'+(r.situacao ? '<span class="situacao-badge'+(normKey(r.situacao)==='pago'?' pago':'')+'">'+r.situacao+'</span>' : '—')+'</td>' +
@@ -1720,7 +1720,7 @@
       trendData = actualData.map(function(){ return avgPerPeriod; });
 
       var unitLabel = isTon ? 'ton' : 'viagem(ns)';
-      var paceTxt = '<div><strong>Ritmo médio no período consultado:</strong> ' + fmtNum(avgPerPeriod, 1) + ' ' + unitLabel + '/' + (period==='dia'?'dia':'semana') + ' (com base em ' + activeDays + ' dia(s) com viagem).</div>';
+      var paceTxt = '<div><strong>Ritmo médio no período consultado:</strong> ' + fmtNum(avgPerPeriod, 0) + ' ' + unitLabel + '/' + (period==='dia'?'dia':'semana') + ' (com base em ' + activeDays + ' dia(s) com viagem).</div>';
 
       // projeção: continuação do gráfico no ritmo atual até zerar o saldo do pedido
       var remaining = isTon ? Math.max(0, toTon(p.falta)) : Math.max(0, p.viagensPendentes);
@@ -1791,7 +1791,7 @@
         meta.data.forEach(function(bar, index){
           var value = chart.data.datasets[0].data[index];
           if(value === undefined || value === null) return;
-          var label = isTon ? fmtNum(value,1) : fmtNum(value,0);
+          var label = fmtNum(value,0);
           ctx.fillText(label, bar.x, bar.y - 4);
         });
         ctx.restore();
@@ -1813,13 +1813,13 @@
             padding:10, cornerRadius:8, displayColors:true,
             callbacks:{ label:function(ctx){
               if(ctx.parsed.y === null || ctx.parsed.y === undefined) return null;
-              return ctx.dataset.label + ': ' + (isTon ? (fmtNum(ctx.parsed.y,2)+' ton') : (fmtNum(ctx.parsed.y,0)+' viagem(ns)'));
+              return ctx.dataset.label + ': ' + (isTon ? (fmtNum(ctx.parsed.y,0)+' ton') : (fmtNum(ctx.parsed.y,0)+' viagem(ns)'));
             } }
           }
         },
         scales:{
           x:{ ticks:{ color:muted, font:{family:'Inter'} }, grid:{ display:false } },
-          y:{ ticks:{ color:muted, font:{family:'Inter'}, precision:isTon?1:0, callback:function(v){return fmtNum(v,isTon?1:0);} }, grid:{ color:gridColor } }
+          y:{ ticks:{ color:muted, font:{family:'Inter'}, precision:0, callback:function(v){return fmtNum(v,0);} }, grid:{ color:gridColor } }
         }
       },
       plugins:[totalizerPlugin]
